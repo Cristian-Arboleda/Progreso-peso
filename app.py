@@ -8,7 +8,7 @@ app.layout = (
     html.Div(
         className='recuadro-inicio-de-sesion',
         children=[
-            html.H1('Welcome', style={})
+            html.H1('Hola mi miadita', style={})
         ]
     )
 )
