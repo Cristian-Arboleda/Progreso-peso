@@ -6,9 +6,28 @@ server = app.server
 
 app.layout = (
     html.Div(
-        className='recuadro-inicio-de-sesion',
         children=[
-            html.H1('Hola mi miadita', style={})
+            html.Div(
+                className='recuadro-inicio-de-sesion',
+                children=[
+                    html.P(
+                        'Iniciar sesion',
+                        style={'text-align': 'center', 'font-size': '25px',}
+                    ),
+                    html.Div(
+                        children=[
+                            html.Label('Nombre: ', htmlFor='nombre', style={}),
+                            dcc.Input(id='nombre')
+                        ]
+                    ),
+                    html.Div(
+                        children=[
+                            html.Label('Contrasena: ', htmlFor='contrasena', style={}),
+                            dcc.Input(id='contrasena')
+                        ]
+                    )
+                ]
+            )
         ]
     )
 )
