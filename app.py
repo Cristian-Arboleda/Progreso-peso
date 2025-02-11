@@ -12,19 +12,21 @@ app.layout = (
                 children=[
                     html.P(
                         'Iniciar sesion',
-                        style={'text-align': 'center', 'font-size': '25px',}
+                        style={'text-align': 'center', 'font-size': '25px', 'margin': '0px',d}
                     ),
                     html.Div(
                         children=[
-                            html.Label('Nombre: ', htmlFor='nombre', style={}),
-                            dcc.Input(id='nombre')
+                            dcc.Input(id='nombre', className='input-inicio-sesion', placeholder='Nombre de usuario', type='text')
                         ]
                     ),
                     html.Div(
                         children=[
-                            html.Label('Contrasena: ', htmlFor='contrasena', style={}),
-                            dcc.Input(id='contrasena')
+                            dcc.Input(id='contrasena', className='input-inicio-sesion', placeholder='Password', type='password')
                         ]
+                    ),
+                    html.Button(
+                        'Enviar',
+                        id='button-inicio-sesion'
                     )
                 ]
             )
