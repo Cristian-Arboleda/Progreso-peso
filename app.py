@@ -12,7 +12,7 @@ app.layout = (
                 children=[
                     html.P(
                         'Iniciar sesion',
-                        style={'text-align': 'center', 'font-size': '25px', 'margin': '0px',d}
+                        style={'text-align': 'center', 'font-size': '25px', 'margin': '0px'}
                     ),
                     html.Div(
                         children=[
