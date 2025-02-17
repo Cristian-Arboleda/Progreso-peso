@@ -53,6 +53,13 @@ def verificacion_inicio_sesion(n_clicks, nombre_usuario, contrasena):
     if contrasena != credenciales[nombre_usuario]['password']:
         return {'display': 'none'}, {'display': 'flex'}, None
     
-    # 🔹 Si las credenciales son correctas, redirigir a dashboard.py
+    # 🔹 credenciales correctas
+    
+    # Guarda el usuario en el archivo inicio.json
+    
+    with open('pages/login/inicio.json', 'w') as file:
+        json.dump({'sesion_iniciada_por': nombre_usuario}, file, indent=4)
+    
+    # Ir a la pagina de dashboard
     return {'display': 'none'}, {'display': 'none'}, '/dashboard'
 # %%
