@@ -1,10 +1,12 @@
 # %%
-from dash import Dash, html, dcc, callback, Input, Output, State, register_page
+from dash import Dash, html, dcc, callback, Input, Output, State, register_page, no_update
 import json
+import time
 
 register_page(__name__, path='/')
 
-layout = (
+layout = html.Div([
+    dcc.Store(id='almacenamiento_datos', data={}, storage_type='session'),
     html.Div(
         children=[
             dcc.Location(id='url'),
@@ -26,20 +28,22 @@ layout = (
             )
         ]
     )
-)
+])
 
 @callback(
     Output(component_id='nombre_incorrecto', component_property='style'),
     Output(component_id='contrasena_incorrecto', component_property='style'),
     Output(component_id='url', component_property='pathname'),
+    Output(component_id='almacenamiento_datos', component_property='data'),
     Input(component_id='button_enviar', component_property='n_clicks'),
     State(component_id='nombre_usuario', component_property='value'),
     State(component_id='contrasena', component_property='value'),
+    prevent_initial_call=True,
 )
 
 def verificacion_inicio_sesion(n_clicks, nombre_usuario, contrasena):
     if not n_clicks:
-        return {'display': 'none'}, {'display': 'none'}, None
+        return {'display': 'none'}, {'display': 'none'}, None, no_update
     
     with open('pages/login/credenciales.json', 'r') as file:
         credenciales = json.load(file)
@@ -47,19 +51,14 @@ def verificacion_inicio_sesion(n_clicks, nombre_usuario, contrasena):
     # Si el nombre de usuario no existe
     if nombre_usuario not in credenciales:
         print('El nombre de usuario no existe')
-        return {'display': 'flex'}, {'display': 'none'}, None
+        return {'display': 'flex'}, {'display': 'none'}, None, no_update
     
     # Si la contrasena es incorrecta
     if contrasena != credenciales[nombre_usuario]['password']:
-        return {'display': 'none'}, {'display': 'flex'}, None
+        return {'display': 'none'}, {'display': 'flex'}, None, no_update
     
     # 🔹 credenciales correctas
     
-    # Guarda el usuario en el archivo inicio.json
-    
-    with open('pages/login/inicio.json', 'w') as file:
-        json.dump({'sesion_iniciada_por': nombre_usuario}, file, indent=4)
-    
     # Ir a la pagina de dashboard
-    return {'display': 'none'}, {'display': 'none'}, '/dashboard'
+    return {'display': 'none'}, {'display': 'none'}, f'/practica', {'sesion_iniciada_por': nombre_usuario}
 # %%
