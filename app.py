@@ -1,6 +1,6 @@
 from dash import Dash
 
-app = Dash(__name__)
+app = Dash(__name__,use_pages=True)
 
 app.server
 
