@@ -1,4 +1,5 @@
 from dash import register_page, html, dcc, callback, Input, Output, State
+import json
 
 register_page(__name__, path='/')
 
@@ -13,3 +14,15 @@ layout = html.Div(
     html.Button('Enviar', id='enviar')
 ])
 
+@callback(
+    Input(component_id='enviar', component_property='n_clicks'),
+    Input(component_id='nombre_usuario', component_property='value')
+)
+
+def verificacion_inicio_sesion(n_clicks):
+    if not n_clicks:
+        print('No se ha presionado el button enviar')
+        return
+    
+    with open('login/credenciales.json', 'r') as file:
+        pass
