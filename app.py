@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Input, Output, State
+from dash import Dash
 
 app = Dash(__name__)
 
