@@ -15,14 +15,19 @@ layout = html.Div(
 ])
 
 @callback(
+    Output(component_id='nombre_usuario_incorrecto', component_property='style'),
     Input(component_id='enviar', component_property='n_clicks'),
     Input(component_id='nombre_usuario', component_property='value')
 )
 
-def verificacion_inicio_sesion(n_clicks):
+def verificacion_inicio_sesion(n_clicks, nombre_usuario ):
     if not n_clicks:
         print('No se ha presionado el button enviar')
         return
     
     with open('login/credenciales.json', 'r') as file:
-        pass
+        credenciales = json.load(file)
+    
+    if nombre_usuario not in credenciales:
+        return {'display': 'flex'}
+    
