@@ -1,4 +1,4 @@
-from dash import Dash
+from dash import Dash, html
 
 app = Dash(
     __name__,
@@ -9,5 +9,9 @@ app = Dash(
 )
 
 app.server
+
+app.layout =html.Div([
+    
+])
 
 app.run_server(port=8050, debug=True)

@@ -12,33 +12,36 @@ layout = html.Div(
     dcc.Input(id='password', type='password', placeholder='Password', className='input'),
     html.P('Contrasena incorrecta', id='password_incorrecta', className='p_incorrecto'),
     html.Button('Enviar', id='enviar'),
-    dcc.Location(id='url')
+    dcc.Location(id='url'),
+    dcc.Store(id='almacenamiento_datos', storage_type='session')
 ])
 
 @callback(
     Output(component_id='nombre_usuario_incorrecto', component_property='style'),
     Output(component_id='password_incorrecta', component_property='style'),
     Output(component_id='url', component_property='pathname'),
+    Output(component_id='almacenamiento_datos', component_property='data'),
     Input(component_id='enviar', component_property='n_clicks'),
     State(component_id='nombre_usuario', component_property='value'),
     State(component_id='password', component_property='value'),
+    prevent_initial_call=True,
 )
 
 def verificacion_inicio_sesion(n_clicks, nombre_usuario, password):
     if not n_clicks:
         print('No se ha presionado el button enviar')
-        return
+        return no_update, no_update, no_update, no_update
     
     with open('pages/login/credenciales.json', 'r') as file:
         credenciales = json.load(file)
     
     if nombre_usuario not in credenciales:
         print('El nombre de usuario no se encuentra')
-        return {'display': 'flex'}, {'display': 'none'}, no_update
+        return {'display': 'flex'}, {'display': 'none'}, no_update, no_update
     
     if password != credenciales[nombre_usuario]['password']:
         print(f'La contrasena para {nombre_usuario} es incorrecta')
-        return {'display': 'none'}, {'display': 'flex'}, no_update
+        return {'display': 'none'}, {'display': 'flex'}, no_update, {'sesion_por': nombre_usuario}
     
     # Credenciales correctas
     
