@@ -3,10 +3,6 @@ from dash import Dash, html
 app = Dash(
     __name__,
     use_pages=True,
-    external_stylesheets=[
-        'assets/login.css',
-        'assets/agregar-eliminar.css',
-        ]
 )
 
 app.server

@@ -17,4 +17,4 @@ def update_bienvenida(almacenamiento_datos):
         return
     
     print(almacenamiento_datos)
-    return f'Bienvenido {almacenamiento_datos['sesion_iniciada_por']}'
+    return f'Bienvenido {almacenamiento_datos["sesion_iniciada_por"]}'
