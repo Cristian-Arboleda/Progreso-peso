@@ -32,17 +32,19 @@ def verificacion_inicio_sesion(n_clicks, nombre_usuario, password):
         print('No se ha presionado el button enviar')
         return no_update, no_update, no_update, no_update
     
-    with open('pages/login/credenciales.json', 'r') as file:
+    with open('pages/credenciales.json', 'r') as file:
         credenciales = json.load(file)
     
+    # Nombre de usuario incorrecto
     if nombre_usuario not in credenciales:
         print('El nombre de usuario no se encuentra')
         return {'display': 'flex'}, {'display': 'none'}, no_update, no_update
     
+    # Contrasena incorrecta
     if password != credenciales[nombre_usuario]['password']:
         print(f'La contrasena para {nombre_usuario} es incorrecta')
-        return {'display': 'none'}, {'display': 'flex'}, no_update, {'sesion_por': nombre_usuario}
+        return {'display': 'none'}, {'display': 'flex'}, no_update, no_update
     
     # Credenciales correctas
     
-    return  no_update, no_update, '/dashboard'
+    return  no_update, no_update, '/dashboard', {'sesion_iniciada_por': nombre_usuario}
