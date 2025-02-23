@@ -1,4 +1,5 @@
 from dash import Dash, html
+import os
 
 app = Dash(
     __name__,
@@ -11,4 +12,6 @@ app.layout =html.Div([
     
 ])
 
-app.run_server(port=8050, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8050))  # Render asigna el puerto en PORT
+    app.run_server(host="0.0.0.0", port=port, debug=False)
