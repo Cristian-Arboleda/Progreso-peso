@@ -1,64 +1,55 @@
-# %%
-from dash import Dash, html, dcc, callback, Input, Output, State, register_page, no_update
+from dash import register_page, html, dcc, callback, Input, Output, State, no_update
 import json
-import time
+import os
+
+current_dir = os.path.dirname(__file__)  
+credenciales_path = os.path.join(current_dir, "credenciales.json")
+
 
 register_page(__name__, path='/')
 
-layout = html.Div([
-    dcc.Store(id='almacenamiento_datos', data={}, storage_type='session'),
-    html.Div(
-        children=[
-            dcc.Location(id='url'),
-            html.Div(
-                className='recuadro-inicio-de-sesion',
-                id='recuadro-inicio-de-sesion',
-                children=[
-                    html.P(
-                        'Iniciar sesion',
-                        style={'text-align': 'center', 'font-size': '25px', 'margin': '20px'}
-                    ),
-                    dcc.Input(id='nombre_usuario', className='input-inicio-sesion', placeholder='Nombre de usuario', type='text'),
-                    html.P('Nombre de usuario incorecto', id='nombre_incorrecto', className='incorrecto'),
-                    dcc.Input(id='contrasena', className='input-inicio-sesion', placeholder='Password', type='password'),
-                    html.P('Contrasena incorrecta', id='contrasena_incorrecto', className='incorrecto'),
-                    html.Button('Enviar', id='button_enviar',
-                    )
-                ]
-            )
-        ]
-    )
+layout = html.Div(
+    id='recuadro_inicio_sesion', 
+    children=[
+    html.P('Iniciar Sesion', className='p_iniciar_sesion'),
+    dcc.Input(id='nombre_usuario', type='text', placeholder='Nombre de usuario', className='input'),
+    html.P('Nombre usuario incorrecto', id='nombre_usuario_incorrecto', className='p_incorrecto'),
+    dcc.Input(id='password', type='password', placeholder='Password', className='input'),
+    html.P('Contrasena incorrecta', id='password_incorrecta', className='p_incorrecto'),
+    html.Button('Enviar', id='enviar'),
+    dcc.Location(id='url'),
+    dcc.Store(id='almacenamiento_datos', storage_type='session')
 ])
 
 @callback(
-    Output(component_id='nombre_incorrecto', component_property='style'),
-    Output(component_id='contrasena_incorrecto', component_property='style'),
+    Output(component_id='nombre_usuario_incorrecto', component_property='style'),
+    Output(component_id='password_incorrecta', component_property='style'),
     Output(component_id='url', component_property='pathname'),
     Output(component_id='almacenamiento_datos', component_property='data'),
-    Input(component_id='button_enviar', component_property='n_clicks'),
+    Input(component_id='enviar', component_property='n_clicks'),
     State(component_id='nombre_usuario', component_property='value'),
-    State(component_id='contrasena', component_property='value'),
+    State(component_id='password', component_property='value'),
     prevent_initial_call=True,
 )
 
-def verificacion_inicio_sesion(n_clicks, nombre_usuario, contrasena):
+def verificacion_inicio_sesion(n_clicks, nombre_usuario, password):
     if not n_clicks:
-        return {'display': 'none'}, {'display': 'none'}, None, no_update
+        print('No se ha presionado el button enviar')
+        return no_update, no_update, no_update, no_update
     
-    with open('pages/login/credenciales.json', 'r') as file:
+    with open(credenciales_path, 'r') as file:
         credenciales = json.load(file)
     
-    # Si el nombre de usuario no existe
+    # Nombre de usuario incorrecto
     if nombre_usuario not in credenciales:
-        print('El nombre de usuario no existe')
-        return {'display': 'flex'}, {'display': 'none'}, None, no_update
+        print('El nombre de usuario no se encuentra')
+        return {'display': 'flex'}, {'display': 'none'}, no_update, no_update
     
-    # Si la contrasena es incorrecta
-    if contrasena != credenciales[nombre_usuario]['password']:
-        return {'display': 'none'}, {'display': 'flex'}, None, no_update
+    # Contrasena incorrecta
+    if password != credenciales[nombre_usuario]['password']:
+        print(f'La contrasena para {nombre_usuario} es incorrecta')
+        return {'display': 'none'}, {'display': 'flex'}, no_update, no_update
     
-    # 🔹 credenciales correctas
+    # Credenciales correctas
     
-    # Ir a la pagina de dashboard
-    return {'display': 'none'}, {'display': 'none'}, f'/practica', {'sesion_iniciada_por': nombre_usuario}
-# %%
+    return  no_update, no_update, '/dashboard', {'sesion_iniciada_por': nombre_usuario}
