@@ -33,10 +33,11 @@ app.layout = html.Div([
 )
 
 def lista_paginas(data, url):
-    
+    print('-'*100)
     print(f'url actual: {url}')
-    if url != '/':
-        return no_update, no_update
+    print(f'datos de sesion: {data}')
+    if url == '/' or not data:
+        return no_update, {'display': 'none'}
     
     # Obtener la lista de las paginas dentro de la carpeta pages e inside
     carpeta = 'pages/inside'
