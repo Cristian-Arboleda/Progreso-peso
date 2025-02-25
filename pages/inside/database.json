@@ -1,3 +1,9 @@
 {
-    "1": {"fecha": "", "ciclo": "", "peso": ""}
+    "cristian": {
+        "1": {"fecha": "marzo", "diurno": 80, "nocturno": 81},
+        "2": {"fecha": "", "ciclo": "", "peso": ""}
+    },
+    "Valentina": {
+        "1": {"fecha": "abril", "diurno": 60, "nocturno": 62}
+    }
 }

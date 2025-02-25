@@ -1,0 +1,20 @@
+#menu_de_paginas_contenedor{
+    display: flex;
+    justify-content: center;
+    gap: 20px; 
+    background: rgb(57, 56, 56);
+    padding: 10px;
+    margin: 8px;
+}
+
+.pagina_de_menu{
+    text-decoration: none; 
+    color: white; font-size: 20px; font-family: Verdana;
+    background: black;
+    padding: 10px;
+}
+
+.pagina_de_menu:hover{
+    background: gold;
+    color: black;
+}
