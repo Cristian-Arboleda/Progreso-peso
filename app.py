@@ -36,8 +36,10 @@ def lista_paginas(data, url):
     print('-'*100)
     print(f'url actual: {url}')
     print(f'datos de sesion: {data}')
+    
+    # Si se esta dentro de la pagina principal o no se ha iniciado sesion, no mostrar menu d paginas
     if url == '/' or not data:
-        return no_update, {'display': 'none'}
+        return url, {'display': 'flex'} # temporal: quiero ver como aparece la pagina principal en render.com ya que no funciona como yo espero
     
     # Obtener la lista de las paginas dentro de la carpeta pages e inside
     carpeta = 'pages/inside'
