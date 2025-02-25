@@ -1,5 +1,4 @@
 #menu_de_paginas_contenedor{
-    display: flex;
     justify-content: center;
     gap: 20px; 
     background: rgb(57, 56, 56);
