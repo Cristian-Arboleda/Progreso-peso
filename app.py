@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, page_container, callback, Input, Output, State, no_update
+from dash import Dash, html, dcc, page_container, callback, Input, Output, State, no_update, ctx
 import os
 
 
@@ -15,10 +15,10 @@ app.layout = html.Div([
         rel='stylesheet',
         href='assets/menu_de_paginas.css'
     ),
-    dcc.Store('almacenamiento_datos', storage_type='session'),
-    dcc.Location(id='url'),
-    
-    #------------------------------------------------------
+    dcc.Store('almacenamiento_datos', storage_type='session'), # almacena y obtiene los datos de sesion
+    dcc.Location(id='path', refresh=True), # Obtiene la path de la pagina actual
+    dcc.Interval(id='verificar', interval=1000, n_intervals=0), # actualiza la pagina cada 500 milisegundos
+    #---------------------------------------------------------------------------------------------------------
     html.Div(id = 'menu_de_paginas_contenedor', style={'display': 'none'}),
     page_container,
 ])
@@ -28,20 +28,22 @@ app.layout = html.Div([
 @callback(
     Output(component_id='menu_de_paginas_contenedor', component_property='children'),
     Output(component_id='menu_de_paginas_contenedor', component_property='style'),
+    Output(component_id='path', component_property='pathname'),
     Input(component_id='almacenamiento_datos', component_property='data'),
-    Input(component_id='url', component_property='pathname'),
+    Input(component_id='path', component_property='pathname'),
 )
 
-def lista_paginas(data, url):
+def lista_paginas(
+    data, path, 
+    ):
     print('-'*100)
-    print(f'url actual: {url}')
+    print(f'path actual: {path}')
     print(f'datos de sesion: {data}')
-    
     # Si se esta dentro de la pagina principal o no se ha iniciado sesion, no mostrar menu d paginas
-    if url == '/' or not data:
-        return url, {'display': 'flex'} # temporal: quiero ver como aparece la pagina principal en render.com ya que no funciona como yo espero
+    if path == '/' or path == '/login' or not data:
+        return '' , {'display': 'none'}, '/login'
     
-    # Obtener la lista de las paginas dentro de la carpeta pages e inside
+    # Obtener la lista de las paginas dentro de la carpeta pages/inside
     carpeta = 'pages/inside'
     lista_paginas = [archivo for archivo in os.listdir(carpeta) if archivo.endswith('.py')]
     
@@ -49,11 +51,12 @@ def lista_paginas(data, url):
     
     lista_paginas = [os.path.splitext(archivo)[0] for archivo in lista_paginas]
     print(f'lista de paginas obtenidas: {lista_paginas}')
+    
     # Crear los links de las paginas
     
     lista_paginas = [dcc.Link(archivo, href=archivo, className='pagina_de_menu') for archivo in lista_paginas]
     
-    return lista_paginas, {'display': 'flex'}
+    return lista_paginas, {'display': 'flex'}, path
 
 
 if __name__ == "__main__":

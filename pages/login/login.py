@@ -6,7 +6,7 @@ current_dir = os.path.dirname(__file__)
 credenciales_path = os.path.join(current_dir, "credenciales.json")
 
 
-register_page(__name__, path='/')
+register_page(__name__, path='/login')
 
 layout = html.Div(
     id='recuadro_inicio_sesion', 
