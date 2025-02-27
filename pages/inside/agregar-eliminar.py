@@ -14,8 +14,6 @@ layout = html.Div([
     dcc.Store(id='almacenamiento_datos', storage_type='session'),
     
     # ------------------------------------------------------
-    
-    html.Div(id='titulo_nombre_usuario'),
     html.Main([
         dcc.Tabs(
             id='agregar-eliminar_tab', value='agregar', children=[
@@ -55,47 +53,33 @@ layout = html.Div([
                 dcc.Tab(label='Eliminar', value='eliminar', children=[
                     html.Div('eliminar')
                 ]),
-                html.Div(id='mensaje_enviado')
             ]
         ),
         dash_table.DataTable(
             id='database_table',
-            columns=[
-                {"name": "ID", "id": "id"},
-                {"name": "Nombre", "id": "nombre"},
-                {"name": "Edad", "id": "edad"}
-            ],
-            data=[
-                {"id": 1, "nombre": "Carlos", "edad": 25},
-            ]
-        )
+            page_size=7,
+            style_header={
+                'font-size': '25px',
+            },
+            style_cell={
+                'font-size': '20px',
+                'padding': '10px',
+            },
+            cell_selectable=False
+        ),
     ])
 ])
 
 
-
-
-
 # obtener el path de database.json
-
 current_dir = os.path.dirname(__file__)  
 database_path = os.path.join(current_dir, "database.json")
 
-
-# nombre del usuario 
-
-@callback(
-    Output(component_id='titulo_nombre_usuario', component_property='children'),
-    Input(component_id='almacenamiento_datos', component_property='data'),
-)
-
-def update_nombre_usuario(almacenamiento_datos):
-    if almacenamiento_datos is None:
-        print('No se encuentra el nombre del usuario que inicio sesion')
-        return 'Nada'
-    print('Estableciendo el nombre de usuario')
-    nombre_usuario = almacenamiento_datos['sesion_iniciada_por']
-    return nombre_usuario
+# obtener los datos de database.json
+def obtener_database():
+    with open(database_path, 'r') as file:
+        database = json.load(file) 
+    return database
 
 
 # mantener los valores del inpur actualizados
@@ -113,16 +97,15 @@ def update_valores_inputs(almacenamiento_datos):
     nombre_usuario = almacenamiento_datos['sesion_iniciada_por']
     
     # Obtener la base de datos
-    
-    with open(database_path, 'r') as file:
-        database = json.load(file)
-    
+    database = obtener_database()
     
     # Obtener siguiente ID
-    siguiente_id = int(list(database[nombre_usuario].keys())[-1]) + 1 
+    if not database[nombre_usuario].keys():
+        siguiente_id = 1
+    else:
+        siguiente_id = int(list(database[nombre_usuario].keys())[-1]) + 1 
     
     # Obtener la fecha actual
-    
     fecha_actual = date.today()
     
     return siguiente_id, fecha_actual
@@ -145,11 +128,12 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
         print(f'Clicks: {n_clicks}')
         return 
     
-    # cargar datos
-    with open(database_path, 'r') as file:
-        database = json.load(file)
+    if not id:
+        print('El id esta vacio')
+        return
     
-    print(database)
+    # cargar datos
+    database = obtener_database()
     
     # Obtener usuario que inicio sesion
     usuario = data['sesion_iniciada_por']
@@ -171,5 +155,25 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     
     print(f'Se guardo: {database[usuario][str(id)]}')
     return 
+
+
+# Actualizar tabla
+@callback(
+    Output(component_id='database_table', component_property='data'),
+    Input(component_id='agregar_button', component_property='n_clicks'),
+    Input(component_id='almacenamiento_datos', component_property='data')
+)
+
+def actualizar_tabla(n_cliks, data):
+    # obtener usuario
+    usuario = data['sesion_iniciada_por']
+    #obtener datos
+    database = obtener_database()
     
+    datos_usuario = database.get(usuario, {})
+    
+    # convertir los datos de usuario a un formato permitido por dash_table
+    datos_usuario = [{'ID': k, **v} for k, v in datos_usuario.items()]
+    
+    return datos_usuario
     
