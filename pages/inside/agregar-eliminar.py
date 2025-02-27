@@ -1,4 +1,4 @@
-from dash import register_page, html, dcc, callback, Input, Output, State, dash_table
+from dash import register_page, html, dcc, callback, Input, Output, State, dash_table, no_update
 import os
 import json
 from datetime import date
@@ -17,32 +17,47 @@ layout = html.Div([
     
     html.Div(id='titulo_nombre_usuario'),
     html.Main([
-        html.H1('Agregar'),
-        html.Div(id='agregar', children=[
-            html.Label('ID:', htmlFor='id_agregar'),
-            dcc.Input(id='id_agregar', type='number',),
-            html.Label('Fecha:', htmlFor='fecha_agregar'),
-            dcc.Input(id='fecha_agregar', type='text'),
-            html.Label('Ciclo:', htmlFor='ciclo_agregar'),
-            dcc.Dropdown(
-                id='ciclo_agregar',
-                options=[
-                    {'label': 'Diurno', 'value': 'diurno'},
-                    {'label': 'Nocturno', 'value': 'nocturno'}
-                ],
-                value='diurno',
-                clearable=False,
-                style={'width': '150px', 'font-size': '20px'}
-            ),
-            html.Label('Peso:'),
-            dcc.Input(id='peso_agregar', type='number'),
-            html.Button('Agregar', id='agregar_button')
-        ]),
-        html.Hr(),
-        html.H1('Eliminar'),
-        html.Div(id='eliminar', children=[
-            
-        ]),
+        dcc.Tabs(
+            id='agregar-eliminar_tab', value='agregar', children=[
+                # --------------------------------------------------------------------------------
+                dcc.Tab(label='Agregar', value='agregar', children=[
+                    html.Div(id='agregar_tab', children=[
+                        html.Div(className='agregar_div', children=[
+                            html.Label('ID', htmlFor='id_agregar'),
+                            dcc.Input(id='id_input_agregar', type='number',),
+                        ]),
+                        html.Div(className='agregar_div', children=[
+                            html.Label('Fecha', htmlFor='fecha_agregar'),
+                            dcc.Input(id='fecha_input_agregar', type='text'),
+                        ]),
+                        html.Div(className='agregar_div', children=[
+                            html.Label('Ciclo', htmlFor='ciclo_agregar'),
+                            dcc.Dropdown(
+                                id='ciclo_dropdown_agregar',
+                                options=[
+                                    {'label': 'Diurno', 'value': 'diurno'},
+                                    {'label': 'Nocturno', 'value': 'nocturno'}
+                                ],
+                                value='diurno',
+                                clearable=False,
+                                searchable=False,
+                                style={'width': '150px', 'font-size': '20px', 'cursor': 'pointer'}
+                            ),
+                        ]),
+                        html.Div(className='agregar_div', children=[
+                            html.Label('Peso'),
+                            dcc.Input(id='peso_input_agregar', type='number'),
+                        ]),
+                        html.Button('Agregar', id='agregar_button')
+                    ])
+                ]),
+                # ----------------------------------------------------------------------------------
+                dcc.Tab(label='Eliminar', value='eliminar', children=[
+                    html.Div('eliminar')
+                ]),
+                html.Div(id='mensaje_enviado')
+            ]
+        ),
         dash_table.DataTable(
             id='database_table',
             columns=[
@@ -56,6 +71,9 @@ layout = html.Div([
         )
     ])
 ])
+
+
+
 
 
 # obtener el path de database.json
@@ -80,11 +98,11 @@ def update_nombre_usuario(almacenamiento_datos):
     return nombre_usuario
 
 
-# actualizar valores de input
+# mantener los valores del inpur actualizados
 
 @callback(
-    Output(component_id='id_agregar', component_property='value' ),
-    Output(component_id='fecha_agregar', component_property='value'),
+    Output(component_id='id_input_agregar', component_property='value' ),
+    Output(component_id='fecha_input_agregar', component_property='value'),
     Input(component_id='almacenamiento_datos',component_property='data'),
 )
 
@@ -111,4 +129,47 @@ def update_valores_inputs(almacenamiento_datos):
 
 
 
+# Enviar valores de los inputs a database.json al presionar el boton enviar
 
+@callback(
+    Input(component_id='agregar_button', component_property='n_clicks'),
+    State(component_id='id_input_agregar', component_property='value'),
+    State(component_id='fecha_input_agregar', component_property='value'),
+    State(component_id='ciclo_dropdown_agregar', component_property='value'),
+    State(component_id='peso_input_agregar', component_property='value'),
+    State(component_id='almacenamiento_datos', component_property='data'),
+)
+
+def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
+    if not n_clicks:
+        print(f'Clicks: {n_clicks}')
+        return 
+    
+    # cargar datos
+    with open(database_path, 'r') as file:
+        database = json.load(file)
+    
+    print(database)
+    
+    # Obtener usuario que inicio sesion
+    usuario = data['sesion_iniciada_por']
+    
+    # Si el id no exite inicilizarlo, esto evita que borre ciclos que ya se hayan creado
+    
+    if not str(id) in database[usuario]:
+        database[usuario][str(id)] = {}
+    
+    # actualizar fecha
+    database[usuario][str(id)]['fecha'] = fecha
+    
+    # actualizar ciclo
+    database[usuario][str(id)][ciclo] = peso
+    
+    # guardar base de datos con los datos insertados
+    with open(database_path, 'w') as file:
+        json.dump(database, file, indent=4)
+    
+    print(f'Se guardo: {database[usuario][str(id)]}')
+    return 
+    
+    

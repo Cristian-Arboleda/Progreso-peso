@@ -1,9 +1,38 @@
 {
     "cristian": {
-        "1": {"fecha": "marzo", "diurno": 80, "nocturno": 81},
-        "2": {"fecha": "", "ciclo": "", "peso": ""}
+        "1": {
+            "fecha": "marzo",
+            "diurno": 80,
+            "nocturno": 81
+        },
+        "2": {
+            "fecha": "",
+            "ciclo": "",
+            "peso": ""
+        },
+        "3": {
+            "fecha": "2025-02-26",
+            "nocturno": 22
+        },
+        "4": {
+            "fecha": "2025-02-26",
+            "diurno": 54,
+            "nocturno": 54
+        },
+        "5": {
+            "fecha": "2025-02-26",
+            "diurno": null
+        },
+        "6": {
+            "fecha": "2025-02-26",
+            "diurno": null
+        }
     },
     "Valentina": {
-        "1": {"fecha": "abril", "diurno": 60, "nocturno": 62}
+        "1": {
+            "fecha": "abril",
+            "diurno": 60,
+            "nocturno": 62
+        }
     }
 }

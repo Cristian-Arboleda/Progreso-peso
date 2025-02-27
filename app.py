@@ -28,7 +28,7 @@ app.layout = html.Div([
 @callback(
     Output(component_id='menu_de_paginas_contenedor', component_property='children'),
     Output(component_id='menu_de_paginas_contenedor', component_property='style'),
-    Output(component_id='path', component_property='pathname'),
+    Output(component_id='path', component_property='pathname'), # Este output es para rederigir / a /login
     Input(component_id='almacenamiento_datos', component_property='data'),
     Input(component_id='path', component_property='pathname'),
 )
@@ -39,8 +39,9 @@ def lista_paginas(
     print('-'*100)
     print(f'path actual: {path}')
     print(f'datos de sesion: {data}')
+    
     # Si se esta dentro de la pagina principal o no se ha iniciado sesion, no mostrar menu d paginas
-    if path == '/' or path == '/login' or not data:
+    if path=='/' or path=='/login' or not data:
         return '' , {'display': 'none'}, '/login'
     
     # Obtener la lista de las paginas dentro de la carpeta pages/inside
