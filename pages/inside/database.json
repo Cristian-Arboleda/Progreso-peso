@@ -1,25 +1,6 @@
 {
     "cristian": {
-        "1": {
-            "fecha": "2025-02-26",
-            "diurno": 22,
-            "nocturno": 22
-        },
-        "2": {
-            "fecha": "2025-02-26",
-            "diurno": 1,
-            "nocturno": 33
-        },
-        "3": {
-            "fecha": "2025-02-26",
-            "nocturno": 2
-        }
     },
     "Valentina": {
-        "1": {
-            "fecha": "abril",
-            "diurno": 60,
-            "nocturno": 62
-        }
     }
 }
