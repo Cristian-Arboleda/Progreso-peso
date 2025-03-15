@@ -17,7 +17,6 @@ app.layout = html.Div([
     ),
     dcc.Store('almacenamiento_datos', storage_type='session'), # almacena y obtiene los datos de sesion
     dcc.Location(id='path', refresh=True), # Obtiene la path de la pagina actual
-    dcc.Interval(id='verificar', interval=1000, n_intervals=0), # actualiza la pagina cada 500 milisegundos
     #---------------------------------------------------------------------------------------------------------
     html.Div(id = 'menu_de_paginas_contenedor', style={'display': 'none'}),
     page_container,
@@ -36,6 +35,7 @@ app.layout = html.Div([
 def lista_paginas(
     data, path, 
     ):
+    
     print('-'*100)
     print(f'path actual: {path}')
     print(f'datos de sesion: {data}')
@@ -49,12 +49,10 @@ def lista_paginas(
     lista_paginas = [archivo for archivo in os.listdir(carpeta) if archivo.endswith('.py')]
     
     # Quitar extension .py de los arhivos
-    
     lista_paginas = [os.path.splitext(archivo)[0] for archivo in lista_paginas]
     print(f'lista de paginas obtenidas: {lista_paginas}')
     
     # Crear los links de las paginas
-    
     lista_paginas = [dcc.Link(archivo, href=archivo, className='pagina_de_menu') for archivo in lista_paginas]
     
     return lista_paginas, {'display': 'flex'}, path

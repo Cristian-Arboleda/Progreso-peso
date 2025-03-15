@@ -1,10 +1,7 @@
 from dash import register_page, html, dcc, callback, Input, Output, State, no_update
 import json
 import os
-
-current_dir = os.path.dirname(__file__)  
-credenciales_path = os.path.join(current_dir, "credenciales.json")
-
+from conectar_db import *
 
 register_page(__name__, path='/login')
 
@@ -41,16 +38,16 @@ def verificacion_inicio_sesion(n_clicks, nombre_usuario, password):
         print('No se ha presionado el button enviar')
         return no_update, no_update, no_update, no_update
     
-    with open(credenciales_path, 'r') as file:
-        credenciales = json.load(file)
+    # Obtener los datos de credenciales
+    credenciales = credenciales_table()
     
-    # Nombre de usuario incorrecto
-    if nombre_usuario not in credenciales:
-        print('El nombre de usuario no se encuentra')
+    # si el usuario no se encuentra registrado en credenciales
+    if not (credenciales['usuario'] == nombre_usuario).any():
+        print(f'El nombre de usuario {nombre_usuario} no se encuentra registrado')
         return {'display': 'flex'}, {'display': 'none'}, no_update, no_update
     
-    # Contrasena incorrecta
-    if password != credenciales[nombre_usuario]['password']:
+    # Verificar que la contrasena sea correcta para el usuario digitado
+    if credenciales.loc[credenciales['usuario'] == nombre_usuario, 'password'].values[0] != password:
         print(f'La contrasena para {nombre_usuario} es incorrecta')
         return {'display': 'none'}, {'display': 'flex'}, no_update, no_update
     
