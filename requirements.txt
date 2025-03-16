@@ -2,3 +2,4 @@ dash
 flask
 gunicorn
 psycopg2
+pandas
