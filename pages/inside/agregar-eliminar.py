@@ -1,7 +1,6 @@
 from dash import register_page, html, dcc, callback, Input, Output, State, dash_table, no_update
-import os
-import json
 from datetime import date
+from conectar_db import *
 
 
 register_page(__name__, path='/agregar-eliminar')
@@ -70,19 +69,7 @@ layout = html.Div([
     ])
 ])
 
-
-# obtener el path de database.json
-current_dir = os.path.dirname(__file__)  
-database_path = os.path.join(current_dir, "database.json")
-
-# obtener los datos de database.json
-def obtener_database():
-    with open(database_path, 'r') as file:
-        database = json.load(file) 
-    return database
-
-
-# mantener los valores del inpur actualizados
+# mantener actualizados los valores del input 
 
 @callback(
     Output(component_id='id_input_agregar', component_property='value' ),
@@ -96,14 +83,17 @@ def update_valores_inputs(almacenamiento_datos):
     # Obtener el nombre de quien haya iniciado sesion
     nombre_usuario = almacenamiento_datos['sesion_iniciada_por']
     
-    # Obtener la base de datos
-    database = obtener_database()
+    # Obtener la tabla del usuario
+    tabla = f'progreso_peso_{nombre_usuario}'
     
-    # Obtener siguiente ID
-    if not database[nombre_usuario].keys():
+    # Crear el siguiente ID
+    query = f'SELECT MAX(id) FROM {tabla}'
+    ultimo_id = consulta_db(query, obtener_datos='uno')[0]
+    if not ultimo_id:
+        # Si no hay datos en la columna id
         siguiente_id = 1
     else:
-        siguiente_id = int(list(database[nombre_usuario].keys())[-1]) + 1 
+        siguiente_id = ultimo_id + 1
     
     # Obtener la fecha actual
     fecha_actual = date.today()
@@ -113,7 +103,6 @@ def update_valores_inputs(almacenamiento_datos):
 
 
 # Enviar valores de los inputs a database.json al presionar el boton enviar
-
 @callback(
     Input(component_id='agregar_button', component_property='n_clicks'),
     State(component_id='id_input_agregar', component_property='value'),
@@ -128,37 +117,38 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
         print(f'Clicks: {n_clicks}')
         return 
     
+    print(f'Datos obtenidos: {id}, {fecha}, {ciclo}, {peso}, {data}')
+    
+    # Es necesario que haya un id
     if not id:
         print('El id esta vacio')
         return
     
-    # cargar datos
-    database = obtener_database()
-    
     # Obtener usuario que inicio sesion
     usuario = data['sesion_iniciada_por']
+    tabla = f"progreso_peso_{usuario}"
     
-    # Si el id no exite inicilizarlo, esto evita que borre ciclos que ya se hayan creado
+    # Verificar que el id exista en la base de datos del usuario
+    query = F"SELECT EXISTS (SELECT 1 FROM {tabla} WHERE id = {id})"
+    id_existe = consulta_db(query, obtener_datos = 'uno')[0]
+    print(f'id {id} existe: {id_existe}')
+    if not id_existe:
+        # Si no exite el id Crear el id
+        query = f"INSERT INTO {tabla} (id) VALUES ({id})"
+        consulta_db(query)
     
-    if not str(id) in database[usuario]:
-        database[usuario][str(id)] = {}
-    
-    # actualizar fecha
-    database[usuario][str(id)]['fecha'] = fecha
-    
-    # actualizar ciclo
-    database[usuario][str(id)][ciclo] = peso
-    
-    # guardar base de datos con los datos insertados
-    with open(database_path, 'w') as file:
-        json.dump(database, file, indent=4)
-    
-    print(f'Se guardo: {database[usuario][str(id)]}')
-    return 
+    # Insertar los datos en el id correspondiente atraves de la actualizacion de datos del id
+    query = f"""
+        UPDATE {tabla}
+        SET fecha = '{fecha}', {ciclo} = {peso}
+        WHERE id = {id}
+    """
+    consulta_db(query)
+    print(f"Datos enviados a la tabla: {tabla}")
 
 
 # Actualizar tabla
-@callback(
+"""@callback(
     Output(component_id='database_table', component_property='data'),
     Input(component_id='agregar_button', component_property='n_clicks'),
     Input(component_id='almacenamiento_datos', component_property='data')
@@ -167,13 +157,14 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
 def actualizar_tabla(n_cliks, data):
     # obtener usuario
     usuario = data['sesion_iniciada_por']
-    #obtener datos
-    database = obtener_database()
     
-    datos_usuario = database.get(usuario, {})
+    # obtener los datos del progreso del usuario
+    query = f'SELECT * FROM progreso_peso_{usuario}'
+    database = consulta_db(query)
+    
     
     # convertir los datos de usuario a un formato permitido por dash_table
-    datos_usuario = [{'ID': k, **v} for k, v in datos_usuario.items()]
+    datos_usuario = [{'ID': k, **v} for k, v in database.items()]
     
-    return datos_usuario
+    return datos_usuario"""
     

@@ -27,7 +27,7 @@ app.layout = html.Div([
 @callback(
     Output(component_id='menu_de_paginas_contenedor', component_property='children'),
     Output(component_id='menu_de_paginas_contenedor', component_property='style'),
-    Output(component_id='path', component_property='pathname'), # Este output es para rederigir / a /login
+    Output(component_id='path', component_property='pathname'), # Este output es para rederigir / a /login si no se ha iniciado sesion
     Input(component_id='almacenamiento_datos', component_property='data'),
     Input(component_id='path', component_property='pathname'),
 )

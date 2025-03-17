@@ -16,6 +16,9 @@ main{
     gap: 10px;
 }
 
+#agregar-eliminar_tab{
+    
+}
 
 #agregar_tab{
     display: flex;
