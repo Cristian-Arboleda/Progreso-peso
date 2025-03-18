@@ -43,7 +43,7 @@ layout = html.Div([
                         ]),
                         html.Div(className='agregar_div', children=[
                             html.Label('Peso'),
-                            dcc.Input(id='peso_input_agregar', type='number'),
+                            dcc.Input(id='peso_input_agregar', type='number', value=60),
                         ]),
                         html.Button('Agregar', id='agregar_button')
                     ])
@@ -54,18 +54,7 @@ layout = html.Div([
                 ]),
             ]
         ),
-        dash_table.DataTable(
-            id='database_table',
-            page_size=7,
-            style_header={
-                'font-size': '25px',
-            },
-            style_cell={
-                'font-size': '20px',
-                'padding': '10px',
-            },
-            cell_selectable=False
-        ),
+        html.Div(id = 'tabla_db'),
     ])
 ])
 
@@ -144,28 +133,39 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
         WHERE id = {id}
     """
     consulta_db(query)
-    print(f"Datos enviados a la tabla: {tabla}")
+    print(f"Datos enviados a la base de datos progreso_peso_bd tabla: {tabla}")
     print("-"*100)
 
 
 # Actualizar tabla
 @callback(
-    Output(component_id='database_table', component_property='data'),
+    Output(component_id='tabla_db', component_property='children'),
     Input(component_id='agregar_button', component_property='n_clicks'),
-    Input(component_id='almacenamiento_datos', component_property='data')
+    State(component_id='almacenamiento_datos', component_property='data'),
 )
 
-def actualizar_tabla(n_cliks, data):
+def actualizar_tabla(n_clicks, data):
+    """
+    Actualiza la tabla de datos para mostrar los datos mas recientes de la base de datos del usuario
+    Args:
+        n_clicks (int): numero de clicks en el boton agregar
+        data (list): lista de datos relacionado con el incio de sesion del usuario 
+    """
     # obtener usuario
     usuario = data['sesion_iniciada_por']
     
     # obtener los datos del progreso del usuario
-    query = f'SELECT * FROM progreso_peso_{usuario}'
+    query = f'SELECT * FROM progreso_peso_{usuario}' 
     conn = conectar_db()
     # convertir a pandas
-    datos_usuario_peso = pd.read_sql(query, conn).to_dict('records')
-    print(datos_usuario_peso)
+    datos_usuario_peso = pd.read_sql(query, conn)
+    # convertir a formato permitido por dash_table
+    datos_usuario_peso = datos_usuario_peso.to_dict('records')
     conn.close()
     
-    return datos_usuario_peso
+    tabla = dash_table.DataTable(
+        data=datos_usuario_peso,
+        page_size= 6,
+    )
+    return tabla
     
