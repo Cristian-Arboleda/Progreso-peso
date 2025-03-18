@@ -145,10 +145,11 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     """
     consulta_db(query)
     print(f"Datos enviados a la tabla: {tabla}")
+    print("-"*100)
 
 
 # Actualizar tabla
-"""@callback(
+@callback(
     Output(component_id='database_table', component_property='data'),
     Input(component_id='agregar_button', component_property='n_clicks'),
     Input(component_id='almacenamiento_datos', component_property='data')
@@ -160,11 +161,11 @@ def actualizar_tabla(n_cliks, data):
     
     # obtener los datos del progreso del usuario
     query = f'SELECT * FROM progreso_peso_{usuario}'
-    database = consulta_db(query)
+    conn = conectar_db()
+    # convertir a pandas
+    datos_usuario_peso = pd.read_sql(query, conn).to_dict('records')
+    print(datos_usuario_peso)
+    conn.close()
     
-    
-    # convertir los datos de usuario a un formato permitido por dash_table
-    datos_usuario = [{'ID': k, **v} for k, v in database.items()]
-    
-    return datos_usuario"""
+    return datos_usuario_peso
     
