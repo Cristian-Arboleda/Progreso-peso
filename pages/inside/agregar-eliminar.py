@@ -50,7 +50,9 @@ layout = html.Div([
                 ]),
                 # ----------------------------------------------------------------------------------
                 dcc.Tab(label='Eliminar', value='eliminar', children=[
-                    html.Div('eliminar')
+                    html.Div(id = 'eliminar_tab', children=[
+                        
+                    ])
                 ]),
             ]
         ),
@@ -135,6 +137,7 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     consulta_db(query)
     print(f"Datos enviados a la base de datos progreso_peso_bd tabla: {tabla}")
     print("-"*100)
+    return 
 
 
 # Actualizar tabla
@@ -155,7 +158,7 @@ def actualizar_tabla(n_clicks, data):
     usuario = data['sesion_iniciada_por']
     
     # obtener los datos del progreso del usuario
-    query = f'SELECT * FROM progreso_peso_{usuario}' 
+    query = f"SELECT * FROM progreso_peso_{usuario} ORDER BY id DESC" 
     conn = conectar_db()
     # convertir a pandas
     datos_usuario_peso = pd.read_sql(query, conn)
@@ -166,6 +169,27 @@ def actualizar_tabla(n_clicks, data):
     tabla = dash_table.DataTable(
         data=datos_usuario_peso,
         page_size= 6,
+        cell_selectable=False,
+        style_header={
+            "color": "white", "background": "black",
+            "font-size": "25px", "font-weight": "bold", "padding": "15px",
+            },
+        style_cell={
+            'padding': '10px', 'text-align': 'center',
+            'font-size': '20px',
+        },
+        style_data_conditional=[
+            # Color de las filas pares (0, 2, 4...)
+            {
+                "if": {"row_index": "even"},
+                "background": "#f9f9f9",
+            },
+            # Color de las filas impares (1, 3, 5...)
+            {
+                "if": {"row_index": "odd"},
+                "background": "#e9e9e9",
+            },
+        ],
     )
     return tabla
     
