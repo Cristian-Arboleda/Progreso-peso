@@ -20,15 +20,15 @@ layout = html.Div([
                 dcc.Tab(label='Agregar', value='agregar', children=[
                     html.Div(id='agregar_tab', children=[
                         html.Div(className='agregar_div', children=[
-                            html.Label('ID', htmlFor='id_agregar'),
-                            dcc.Input(id='id_input_agregar', type='number',),
+                            html.Label('ID', htmlFor='id_input_agregar'),
+                            dcc.Input(id='id_input_agregar', type='number', min=1),
                         ]),
                         html.Div(className='agregar_div', children=[
-                            html.Label('Fecha', htmlFor='fecha_agregar'),
+                            html.Label('Fecha', htmlFor='fecha_input_agregar'),
                             dcc.Input(id='fecha_input_agregar', type='text'),
                         ]),
                         html.Div(className='agregar_div', children=[
-                            html.Label('Ciclo', htmlFor='ciclo_agregar'),
+                            html.Label('Ciclo', htmlFor='ciclo_dropdown_agregar'),
                             dcc.Dropdown(
                                 id='ciclo_dropdown_agregar',
                                 options=[
@@ -42,8 +42,8 @@ layout = html.Div([
                             ),
                         ]),
                         html.Div(className='agregar_div', children=[
-                            html.Label('Peso'),
-                            dcc.Input(id='peso_input_agregar', type='number', value=60),
+                            html.Label('Peso', htmlFor='peso_input_agregar'),
+                            dcc.Input(id='peso_input_agregar', type='number', value=60, min=20),
                         ]),
                         html.Button('Agregar', id='agregar_button')
                     ])
