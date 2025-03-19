@@ -170,6 +170,7 @@ def actualizar_tabla(n_clicks, data):
     #cerrar conexion con la base de datos
     conn.close()
     
+    # Crear la tabla que muestrar los registros del peso del usuario
     tabla = dash_table.DataTable(
         data=datos_usuario_peso.to_dict('records'), # convertir a formato permitido por dash_table
         columns=[{"name": nombre_col.title(), "id": nombre_col,} for nombre_col in datos_usuario_peso.columns],
@@ -182,6 +183,7 @@ def actualizar_tabla(n_clicks, data):
         style_cell={
             'padding': '10px', 'text-align': 'center',
             'font-size': '20px',
+            'border': 'none'
         },
         style_data_conditional=[
             # Color de las filas pares (0, 2, 4...)
