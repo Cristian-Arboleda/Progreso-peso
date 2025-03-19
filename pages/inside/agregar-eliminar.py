@@ -51,7 +51,8 @@ layout = html.Div([
                 # ----------------------------------------------------------------------------------
                 dcc.Tab(label='Eliminar', value='eliminar', children=[
                     html.Div(id = 'eliminar_tab', children=[
-                        
+                        html.Label('ID'),
+                        dcc.Input(id='id_eliminar')
                     ])
                 ]),
             ]
@@ -68,7 +69,7 @@ layout = html.Div([
     Input(component_id='almacenamiento_datos',component_property='data'),
 )
 
-def update_valores_inputs(almacenamiento_datos):
+def actualizar_valores_inputs(almacenamiento_datos):
     print('Actualizando los valores de los inputs de agregar')
     
     # Obtener el nombre de quien haya iniciado sesion
@@ -157,22 +158,26 @@ def actualizar_tabla(n_clicks, data):
     # obtener usuario
     usuario = data['sesion_iniciada_por']
     
-    # obtener los datos del progreso del usuario
-    query = f"SELECT * FROM progreso_peso_{usuario} ORDER BY id DESC" 
+    #crear conexion con la base de datos
     conn = conectar_db()
+    
+    # Crear consulta para obtener los datos de la base datos
+    query = f"SELECT * FROM progreso_peso_{usuario} ORDER BY id DESC" 
+    
     # convertir a pandas
     datos_usuario_peso = pd.read_sql(query, conn)
-    # convertir a formato permitido por dash_table
-    datos_usuario_peso = datos_usuario_peso.to_dict('records')
+    
+    #cerrar conexion con la base de datos
     conn.close()
     
     tabla = dash_table.DataTable(
-        data=datos_usuario_peso,
+        data=datos_usuario_peso.to_dict('records'), # convertir a formato permitido por dash_table
+        columns=[{"name": nombre_col.title(), "id": nombre_col,} for nombre_col in datos_usuario_peso.columns],
         page_size= 6,
         cell_selectable=False,
         style_header={
             "color": "white", "background": "black",
-            "font-size": "25px", "font-weight": "bold", "padding": "15px",
+            "font-size": "25px", "font-weight": "bold", "padding": "13px",
             },
         style_cell={
             'padding': '10px', 'text-align': 'center',
