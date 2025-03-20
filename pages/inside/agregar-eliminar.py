@@ -149,15 +149,10 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
 @callback(
     Output(component_id='tabla_db', component_property='children'),
     Input(component_id='agregar_button', component_property='n_clicks'),
+    Input(component_id='eliminar_button', component_property='n_clicks'),
     State(component_id='almacenamiento_datos', component_property='data'),
 )
-def actualizar_tabla(n_clicks, data):
-    """
-    Actualiza la tabla de datos para mostrar los datos mas recientes de la base de datos del usuario
-    Args:
-        n_clicks (int): numero de clicks en el boton agregar
-        data (list): lista de datos relacionado con el incio de sesion del usuario 
-    """
+def actualizar_tabla(n_clicks_agregar, n_cliks_eliminar, data):
     # obtener usuario
     usuario = data['sesion_iniciada_por']
     
@@ -239,3 +234,39 @@ def actulizar_id_eliminar(data, id_eliminar,):
     ]
     
     return  resultado
+
+
+# Eliminar registro por id
+@callback(
+    Input(component_id='eliminar_button', component_property='n_clicks'),
+    State(component_id='almacenamiento_datos', component_property='data'),
+    State(component_id='id_eliminar', component_property='value'),
+    prevent_initial_call=True,
+)
+
+def eliminar_registro_por_id( n_clicks, data, id_eliminar):
+    if not n_clicks:
+        return
+    
+    # Obtener usuario quien incio sesion
+    usuario = data['sesion_iniciada_por']
+    
+    # conectar con la base de datos
+    conn, cur = None, None
+    try:
+        conn = conectar_db()
+        cur = conn.cursor()
+        query = f"DELETE FROM progreso_peso_{usuario} WHERE id = {id_eliminar}"
+        cur.execute(query)
+        # Enviar cambios a la base de datos
+        conn.commit()
+        print(f'Se elimino el registro del id {id_eliminar}')
+    except Exception as error:
+        print(f'Error al eliminar el registro del id: {error}')
+    finally:
+        # cerrar base de datos
+        if cur != None:
+            cur.close()
+        if conn != None:
+            conn.close()
+    
