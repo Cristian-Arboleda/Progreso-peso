@@ -15,7 +15,7 @@ layout = html.Div([
     # ------------------------------------------------------
     html.Main([
         dcc.Tabs(
-            id='agregar-eliminar_tab', value='agregar', children=[
+            id='agregar-eliminar_tab', value='eliminar', children=[
                 # --------------------------------------------------------------------------------
                 dcc.Tab(label='Agregar', value='agregar', children=[
                     html.Div(id='agregar_tab', children=[
@@ -51,8 +51,12 @@ layout = html.Div([
                 # ----------------------------------------------------------------------------------
                 dcc.Tab(label='Eliminar', value='eliminar', children=[
                     html.Div(id = 'eliminar_tab', children=[
-                        html.Label('ID'),
-                        dcc.Input(id='id_eliminar')
+                        html.Div(className='eliminar_divs', children=[
+                            html.Label('ID'),
+                            dcc.Input(id='id_eliminar', type='number', value=1, min=1),
+                        ]),
+                        html.Div(id = 'output_eliminar'),
+                        html.Button('Eliminar', id='eliminar_button'),
                     ])
                 ]),
             ]
@@ -147,7 +151,6 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     Input(component_id='agregar_button', component_property='n_clicks'),
     State(component_id='almacenamiento_datos', component_property='data'),
 )
-
 def actualizar_tabla(n_clicks, data):
     """
     Actualiza la tabla de datos para mostrar los datos mas recientes de la base de datos del usuario
@@ -199,4 +202,40 @@ def actualizar_tabla(n_clicks, data):
         ],
     )
     return tabla
+
+# 
+@callback(
+    Output(component_id='output_eliminar', component_property='children'),
+    Input(component_id='almacenamiento_datos', component_property='data'),
+    Input(component_id='id_eliminar', component_property='value'),
+)
+def actulizar_id_eliminar(data, id_eliminar,):
+    # Obtener el usuario
+    usuario = data['sesion_iniciada_por']
     
+    # Obtener los nombnres de cada columna de la tabla pogreso_peso_usuario
+    query = f"""
+    SELECT column_name, data_type
+    FROM information_schema.columns
+    WHERE table_name = 'progreso_peso_{usuario}'
+    """
+    nombres_columnas = consulta_db(query, obtener_datos='todos')
+    nombres_columnas = [nombre[0] for nombre in nombres_columnas]
+    
+    # Obtener los datos del id
+    query = f'SELECT * FROM progreso_peso_{usuario} WHERE id = {id_eliminar}'
+    registro_id = consulta_db(query=query, obtener_datos='uno')
+    
+    if not registro_id:
+        return 'No existe este registro'
+    
+    # crear los elementos html
+    resultado = [
+        html.Div(className='eliminar_divs', children=[
+        html.P(nombre_columna.title(), className='p_nombre_columna'),
+        html.P(dato, className='p_dato')
+        ])
+        for nombre_columna, dato in zip(nombres_columnas, registro_id) if nombre_columna != 'id' 
+    ]
+    
+    return  resultado

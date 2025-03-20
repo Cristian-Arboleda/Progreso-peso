@@ -16,16 +16,11 @@ main{
     gap: 10px;
 }
 
-#agregar-eliminar_tab{
-    
-}
-
 #agregar_tab{
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    width: 400px;
     margin-top: 10px
 }
 
@@ -74,3 +69,43 @@ input:focus{
     font-size: 22px;
     background: rgb(136, 50, 136)
 }
+
+
+/*------------------------------------------------------------------------------------*/
+#eliminar_tab{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin: 10px;
+}
+
+.eliminar_divs{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+#output_eliminar{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+p{
+    margin: 0px;
+    font-size: 20px
+}
+.p_nombre_columna{
+    text-align: right;
+}
+
+#eliminar_button{
+    width: 105px; height: 45px;
+    background: rgb(111, 27, 111);
+    color: rgb(243, 251, 253); font-size: 20px;
+    border: none;
+    border-radius: 5px;
+    margin: 2px
+}
+
