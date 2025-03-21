@@ -36,7 +36,6 @@ def lista_paginas(
     data, path, 
     ):
     
-    print('-'*100)
     print(f'path actual: {path}')
     print(f'datos de sesion: {data}')
     
@@ -55,6 +54,7 @@ def lista_paginas(
     # Crear los links de las paginas
     lista_paginas = [dcc.Link(archivo, href=archivo, className='pagina_de_menu') for archivo in lista_paginas]
     
+    print('-'*100)
     return lista_paginas, {'display': 'flex'}, path
 
 

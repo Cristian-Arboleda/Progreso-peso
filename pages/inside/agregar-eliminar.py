@@ -15,17 +15,17 @@ layout = html.Div([
     # ------------------------------------------------------
     html.Main([
         dcc.Tabs(
-            id='agregar-eliminar_tab', value='eliminar', children=[
+            id='agregar-eliminar_tab', value='agregar', children=[
                 # --------------------------------------------------------------------------------
                 dcc.Tab(label='Agregar', value='agregar', children=[
                     html.Div(id='agregar_tab', children=[
                         html.Div(className='agregar_div', children=[
                             html.Label('ID', htmlFor='id_input_agregar'),
-                            dcc.Input(id='id_input_agregar', type='number', min=1),
+                            dcc.Input(className='input_agregar_eliminar', id='id_input_agregar', type='number', min=1),
                         ]),
                         html.Div(className='agregar_div', children=[
                             html.Label('Fecha', htmlFor='fecha_input_agregar'),
-                            dcc.Input(id='fecha_input_agregar', type='text'),
+                            dcc.Input(className='input_agregar_eliminar', id='fecha_input_agregar', type='text'),
                         ]),
                         html.Div(className='agregar_div', children=[
                             html.Label('Ciclo', htmlFor='ciclo_dropdown_agregar'),
@@ -43,7 +43,7 @@ layout = html.Div([
                         ]),
                         html.Div(className='agregar_div', children=[
                             html.Label('Peso', htmlFor='peso_input_agregar'),
-                            dcc.Input(id='peso_input_agregar', type='number', value=60, min=20),
+                            dcc.Input(className='input_agregar_eliminar', id='peso_input_agregar', type='number', value=60, min=20),
                         ]),
                         html.Button('Agregar', id='agregar_button')
                     ])
@@ -53,7 +53,7 @@ layout = html.Div([
                     html.Div(id = 'eliminar_tab', children=[
                         html.Div(className='eliminar_divs', children=[
                             html.Label('ID'),
-                            dcc.Input(id='id_eliminar', type='number', value=1, min=1),
+                            dcc.Input(className='input_agregar_eliminar', id='id_eliminar', type='number', value=1, min=1),
                         ]),
                         html.Div(id = 'output_eliminar'),
                         html.Button('Eliminar', id='eliminar_button'),

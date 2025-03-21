@@ -20,33 +20,25 @@ def conectar_db():
 
 def credenciales_table():
     try:
-        conn = conectar_db()
-        query = "SELECT * FROM credenciales"
-        credenciales = pd.read_sql(query, conn)
-        conn.close()
-        return credenciales
+        with conectar_db() as conn:
+            with conn.cursor() as cur:
+                query = "SELECT * FROM credenciales"
+                credenciales = pd.read_sql(query, conn)
+                return credenciales
     except Exception as error:
         print(f'Error: {error}')
 
 def consulta_db(query, obtener_datos = None):
-    try:
-        conn = conectar_db()
-        cur = conn.cursor()
-        cur.execute(query)
-        if obtener_datos == 'todos':
-            resultado = cur.fetchall()
-            return resultado
-        elif obtener_datos == 'uno':
-            resultado = cur.fetchone()
-            return resultado
-        
-        conn.commit()
-        # cerrar 
-        conn.close()
-        cur.close()
-        
-    except Exception as error:
-        print(f'Error: {error}')
+    with conectar_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            if obtener_datos == 'todos':
+                resultado = cur.fetchall()
+                return resultado
+            elif obtener_datos == 'uno':
+                resultado = cur.fetchone()
+                return resultado
+            conn.commit()
 
 
 

@@ -4,14 +4,10 @@ body{
     font-family: Verdana;
 }
 
-#titulo_nombre_usuario{
-    display: flex;
-    font-size: 20px;
-    margin: 10px;
-    position: absolute;
-}
 main{
+    background: none;
     display: flex;
+    flex-direction: row;
     justify-content: center;
     gap: 10px;
 }
@@ -40,7 +36,7 @@ label:hover{
     cursor: pointer
 }
 
-input{
+.input_agregar_eliminar{
     border-radius: 2px;
     border: 1px solid transparent;
     margin: 0px;
@@ -49,7 +45,7 @@ input{
     width: 150px
 }
 
-input:focus{
+.input_agregar_eliminar:focus{
     border: 1px solid black;
 }
 
