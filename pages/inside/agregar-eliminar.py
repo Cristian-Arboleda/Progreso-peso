@@ -1,6 +1,7 @@
 from dash import register_page, html, dcc, callback, Input, Output, State, dash_table, no_update
 from datetime import date
 from conectar_db import *
+import pandas as pd
 
 
 register_page(__name__, path='/agregar-eliminar')
@@ -66,13 +67,11 @@ layout = html.Div([
 ])
 
 # mantener actualizados los valores del input 
-
 @callback(
     Output(component_id='id_input_agregar', component_property='value' ),
     Output(component_id='fecha_input_agregar', component_property='value'),
     Input(component_id='almacenamiento_datos',component_property='data'),
 )
-
 def actualizar_valores_inputs(almacenamiento_datos):
     print('Actualizando los valores de los inputs de agregar')
     
@@ -107,7 +106,6 @@ def actualizar_valores_inputs(almacenamiento_datos):
     State(component_id='peso_input_agregar', component_property='value'),
     State(component_id='almacenamiento_datos', component_property='data'),
 )
-
 def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     if not n_clicks:
         print(f'Clicks: {n_clicks}')
@@ -127,7 +125,6 @@ def enviar_datos(n_clicks, id, fecha, ciclo, peso, data):
     # Verificar que el id exista en la base de datos del usuario
     query = F"SELECT EXISTS (SELECT 1 FROM {tabla} WHERE id = {id})"
     id_existe = consulta_db(query, obtener_datos = 'uno')[0]
-    print(f'id {id} existe: {id_existe}')
     if not id_existe:
         # Si no exite el id Crear el id
         query = f"INSERT INTO {tabla} (id) VALUES ({id})"

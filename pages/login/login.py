@@ -38,19 +38,29 @@ def verificacion_inicio_sesion(n_clicks, nombre_usuario, password):
         print('No se ha presionado el button enviar')
         return no_update, no_update, no_update, no_update
     
-    # Obtener los datos de credenciales
-    credenciales = credenciales_table()
+    # El nombre de la tabla donde se van a obtener las crdenciales
+    tabla = 'credenciales'
     
-    # si el usuario no se encuentra registrado en credenciales
-    if not (credenciales['usuario'] == nombre_usuario).any():
+    # Verificar que el usuario se encuentre registrado
+    query = f"""
+    SELECT usuario FROM {tabla}
+    WHERE usuario = '{nombre_usuario}'
+    """
+    
+    # Si la culsulta no arroja un resultado significa que el usuario no se encuentra registrado en la basa de datos tabla credenciales
+    if not consulta_db(query=query, obtener_datos='uno'):
         print(f'El nombre de usuario {nombre_usuario} no se encuentra registrado')
         return {'display': 'flex'}, {'display': 'none'}, no_update, no_update
     
     # Verificar que la contrasena sea correcta para el usuario digitado
-    if credenciales.loc[credenciales['usuario'] == nombre_usuario, 'password'].values[0] != password:
+    query = f"""
+    SELECT password FROM {tabla}
+    WHERE usuario = '{nombre_usuario}'
+    """
+    # obtener la contrasena de la base de datos
+    if not consulta_db(query=query, obtener_datos='uno')[0] == password:
         print(f'La contrasena para {nombre_usuario} es incorrecta')
         return {'display': 'none'}, {'display': 'flex'}, no_update, no_update
     
-    # Credenciales correctas
-    
+    print(f'Iniciando sesion: {nombre_usuario}')
     return  no_update, no_update, '/dashboard', {'sesion_iniciada_por': nombre_usuario}

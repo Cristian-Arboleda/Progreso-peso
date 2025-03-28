@@ -14,10 +14,13 @@ main{
 
 .div_contenedor_peso{
     display: flex;
+    flex-direction: row;
+    gap: 10px;
 }
 
 .divs_peso{
-    background: rgb(219, 215, 215);
+    background: rgb(251, 244, 244);
+    padding: 10px;
 }
 .p_peso_texto{
     text-align: center;

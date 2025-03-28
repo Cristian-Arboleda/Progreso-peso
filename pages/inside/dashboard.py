@@ -3,7 +3,7 @@ from conectar_db import *
 
 register_page(__name__, path='/dashboard')
 
-pesos_id = ['peso_inicial', 'peso_actual', 'peso_perdido', 'mayor_peso', 'menor_peso']
+pesos_id = ['peso_inicial', 'peso_actual', 'peso_perdido', 'peso_mayor', 'peso_menor', 'peso_perdido_en_promedio']
 
 layout = html.Main(children=[
     dcc.Store(id='almacenamiento_datos', storage_type='session'),
@@ -26,7 +26,7 @@ layout = html.Main(children=[
         ),
     ]),
     html.Div(className='div_contenedor_peso', children=[
-        *[html.Div(className= 'divs_item_peso',children=[
+        *[html.Div(className= 'divs_peso',children=[
         html.P(peso_id.replace("_", " ").title(), className='p_peso_texto'),
         html.Div(id=peso_id)
         ])
@@ -77,8 +77,6 @@ def actualizar_dropdown_years(data):
 def actualizar_dropdown_months(data, years_list):
     usuario = data['sesion_iniciada_por']
     
-    print(f'Años seleccionados: {years_list} {type(years_list)}')
-    
     if not years_list:
         return [{'label': 'Seleccione un año', 'value': ''}], ''
     
@@ -110,42 +108,68 @@ def actualizar_dropdown_months(data, years_list):
     
     # realizar consulta a la base de datos
     months_db = consulta_db(query=query, obtener_datos='todos')
-    print(months_db)
     
     # Convertir months_db en una lista
     months_index_list = [str(month_index[0]) for month_index in months_db]
-    print(months_index_list)
-    
-    months = {'1': 'enero', '2': 'febrero', '3': 'marzo', '4': 'abril', '5': 'mayo', '6': 'Junio', '7': 'julio', '8': 'agosto', '9': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre'}
-    
+    months = {
+        '1': 'enero',
+        '2': 'febrero', 
+        '3': 'marzo', 
+        '4': 'abril', 
+        '5': 'mayo', 
+        '6': 'Junio', 
+        '7': 'julio', 
+        '8': 'agosto',
+        '9': 'septiembre',
+        '10': 'octubre',
+        '11': 'noviembre',
+        '12': 'diciembre'
+    }
     months_por_years= [months[month_index] for month_index in months_index_list]
-    print(f'meses {months_por_years}')
-    
     months_list = [{'label': month.title(), 'value': index_month} for month, index_month in zip(months_por_years, months_index_list)]
-    print(months_list)
     
     return months_list, months_index_list[-1]
 
 
-
-"""
--Peso inicial
-valor
-fecha
-
--Peso actual
-valor
-fecha
-
--Peso perdido
-valor
-fecha_inicial fecha_actual
-
--Mayor peso
-valor
-fecha
-
--Menor peso
-valor
-fecha
-"""
+@callback(
+    [Output(component_id = ids, component_property = 'children') for ids in pesos_id],
+    Input(component_id='almacenamiento_datos', component_property='data'),
+    Input(component_id='dropdown_years', component_property='value'),
+    Input(component_id='dropdown_months', component_property='value'),
+)
+def actualizar_los_datos_del_peso(data, years, months):
+    usuario = data['sesion_iniciada_por']
+    
+    datos_peso = {dato: 'Sin valor' for dato in pesos_id}
+    
+    # verificar que el los meses y los years no esten vacios
+    if not years or not months:
+        return [dato for dato in datos_peso.values()]
+    
+    #
+    if not isinstance(years, list):
+        years = [years]
+    if not isinstance(months, list):
+        months = [months]
+    
+    # Obtener de la base de datos el peso inicial en base al years y el months seleccionados
+    query = f"""
+    SELECT diurno FROM progreso_peso_{usuario}
+    WHERE EXTRACT(YEAR FROM fecha) = {min(years)}  -- Año específico
+    AND EXTRACT(MONTH FROM fecha) = {min(months)}    -- Mes específico
+    ORDER BY fecha ASC  -- Ordenar por fecha ascendente (más antigua primero)
+    LIMIT 1;
+    """
+    valor = consulta_db(query=query, obtener_datos='uno')
+    print('peso inicial', valor)
+    
+    # 
+    if valor:
+        datos_peso['peso_inicial'] = valor[0]
+    
+    # Obtener de la base de datos el peso actual
+    query="""
+    
+    """
+    
+    return [dato_peso for dato_peso in datos_peso.values()]
