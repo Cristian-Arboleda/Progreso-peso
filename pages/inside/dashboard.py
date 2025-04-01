@@ -1,39 +1,39 @@
 from dash import register_page, html, dcc, callback, Input, Output
 from conectar_db import *
+from datetime import datetime
 
 register_page(__name__, path='/dashboard')
 
-pesos_id = ['peso_inicial', 'peso_actual', 'peso_perdido', 'peso_mayor', 'peso_menor', 'peso_perdido_en_promedio']
+pesos_id = ['peso_inicial', 'peso_final', 'peso_perdido', 'peso_mayor', 'peso_menor', 'peso_perdido_prom']
+pesos_id_totales = [peso_id+'_total' for peso_id in pesos_id]
+pesos_id_relativos = [peso_id+'_relativo' for peso_id in pesos_id]
 
 layout = html.Main(children=[
     dcc.Store(id='almacenamiento_datos', storage_type='session'),
     html.Link(rel='stylesheet', href='assets/dashboard.css'),
-    # ------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------------------------------------------------
     html.Div(className= 'div_contenedor_opciones_principales', children=[
-        dcc.Dropdown(
-            id = 'dropdown_years',
-            clearable=False,
-            searchable=False,
-            multi=True,
-            style={'width': '300px'},
-            ),
-        dcc.Dropdown(
-            id = 'dropdown_months',
-            clearable=False,
-            searchable=False,
-            multi=True,
-            style={'width': '500px'},
-        ),
+        dcc.Dropdown( id = 'dropdown_years', clearable=False, searchable=False, multi=False, style={'width': '300px'},),
+        dcc.Dropdown( id = 'dropdown_months', clearable=False, searchable=False, multi=False, style={'width': '500px',},),
     ]),
-    html.Div(className='div_contenedor_peso', children=[
-        *[html.Div(className= 'divs_peso',children=[
-        html.P(peso_id.replace("_", " ").title(), className='p_peso_texto'),
-        html.Div(id=peso_id)
+    # Pesos totales
+    html.Div(className='div_contenedor_pesos', children=[
+        *[html.Div(className= 'div_peso', children=[
+            html.P(peso_id_total.replace("_", " ").title(), className='p_peso_texto'),
+            html.Div(id=peso_id_total)
         ])
-        for peso_id in pesos_id]
+        for peso_id_total in pesos_id_totales]
     ]),
-    
+    # Pesos relativos
+    html.Div(className='div_contenedor_pesos', children=[
+        *[html.Div(className='div_peso', children=[
+            html.P(peso_relativo.replace('_', ' ').title(), className='p_peso_texto',),
+            html.Div(id=peso_relativo)
+        ])
+        for peso_relativo in pesos_id_relativos] 
+    ]),
 ])
+
 
 @callback(
     Output(component_id='dropdown_years', component_property='options'),
@@ -56,15 +56,14 @@ def actualizar_dropdown_years(data):
         return resultado, value  
     
     years_list = [year[0] for year in years_db]
-    years_list.append('Todos')
     
     resultado = [
         {'label': year, 'value': year}
         for year in years_list
     ]
     
-    # Obtener el valor que se va a mostrar al cargar la pagina en el dropdown years
-    value = years_list[-2]
+    # Obtener el valor que se va a mostrar en el dropdown years
+    value = years_list[-1]
     
     return resultado, value
 
@@ -74,43 +73,20 @@ def actualizar_dropdown_years(data):
     Input(component_id='almacenamiento_datos', component_property='data'),
     Input(component_id='dropdown_years', component_property='value'), # el year es el indice donde se van a obntener los meses
 )
-def actualizar_dropdown_months(data, years_list):
+def actualizar_dropdown_months(data, year_seleccionado):
     usuario = data['sesion_iniciada_por']
     
-    if not years_list:
-        return [{'label': 'Seleccione un año', 'value': ''}], ''
-    
-    # Si los years no estan en una lista, convertirla en una lista
-    if not isinstance(years_list, list):
-        years_list = [years_list]
-    
-    if 'Todos' in years_list:
-        query = f"""
-        SELECT DISTINCT EXTRACT(MONTH FROM fecha) AS mes
-        FROM progreso_peso_{usuario}
-        ORDER BY mes
-        """
-    else:
-        if len(years_list) == 1:
-            query = f"""
-                SELECT DISTINCT EXTRACT(MONTH FROM fecha) AS mes
-                FROM progreso_peso_{usuario}
-                WHERE EXTRACT(YEAR FROM fecha) IN ({years_list[0]})
-                ORDER BY mes
-            """
-        else:
-            query = f"""
-                SELECT DISTINCT EXTRACT(MONTH FROM fecha) AS mes
-                FROM progreso_peso_{usuario}
-                WHERE EXTRACT(YEAR FROM fecha) IN {tuple(years_list)}
-                ORDER BY mes
-            """
-    
-    # realizar consulta a la base de datos
+    # Obtener la lista de los meses en base al year seleccionado
+    query = f"""
+    SELECT DISTINCT EXTRACT(MONTH FROM fecha) AS mes
+    FROM progreso_peso_{usuario}
+    WHERE EXTRACT(YEAR FROM fecha) = {year_seleccionado}
+    """
     months_db = consulta_db(query=query, obtener_datos='todos')
     
     # Convertir months_db en una lista
     months_index_list = [str(month_index[0]) for month_index in months_db]
+    
     months = {
         '1': 'enero',
         '2': 'febrero', 
@@ -123,53 +99,77 @@ def actualizar_dropdown_months(data, years_list):
         '9': 'septiembre',
         '10': 'octubre',
         '11': 'noviembre',
-        '12': 'diciembre'
+        '12': 'diciembre',
     }
-    months_por_years= [months[month_index] for month_index in months_index_list]
-    months_list = [{'label': month.title(), 'value': index_month} for month, index_month in zip(months_por_years, months_index_list)]
+    months_options = [{'label': months[month_index].title(), 'value': month_index} for month_index in months_index_list]
     
-    return months_list, months_index_list[-1]
+    return months_options, months_index_list[-1]
 
 
 @callback(
-    [Output(component_id = ids, component_property = 'children') for ids in pesos_id],
-    Input(component_id='almacenamiento_datos', component_property='data'),
-    Input(component_id='dropdown_years', component_property='value'),
-    Input(component_id='dropdown_months', component_property='value'),
+    [
+        Output(component_id=peso_id_total, component_property='children')
+        for peso_id_total in pesos_id_totales
+    ],
+    Input(component_id='almacenamiento_datos', component_property='data')
 )
-def actualizar_los_datos_del_peso(data, years, months):
+def actualizas_pesos_totales(data):
     usuario = data['sesion_iniciada_por']
     
-    datos_peso = {dato: 'Sin valor' for dato in pesos_id}
+    valores = {peso_total: 'Sin valor' for peso_total in pesos_id_totales} 
+    fechas = {peso_total: 'Sin valor' for peso_total in pesos_id_totales} 
     
-    # verificar que el los meses y los years no esten vacios
-    if not years or not months:
-        return [dato for dato in datos_peso.values()]
+    def crear_query(indice, tipo):
+        query = f"""
+        SELECT diurno, fecha FROM progreso_peso_{usuario}
+        WHERE {indice} = (SELECT {tipo}({indice}) FROM progreso_peso_{usuario})
+        LIMIT 1
+        """
+        return query
     
-    #
-    if not isinstance(years, list):
-        years = [years]
-    if not isinstance(months, list):
-        months = [months]
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso inicial total
+    query = query=crear_query('fecha', 'MIN')
+    valor = consulta_db(query, obtener_datos='uno')
+    valores['peso_inicial_total'] = valor[0]
+    fechas['peso_inicial_total'] = valor[1]
     
-    # Obtener de la base de datos el peso inicial en base al years y el months seleccionados
-    query = f"""
-    SELECT diurno FROM progreso_peso_{usuario}
-    WHERE EXTRACT(YEAR FROM fecha) = {min(years)}  -- Año específico
-    AND EXTRACT(MONTH FROM fecha) = {min(months)}    -- Mes específico
-    ORDER BY fecha ASC  -- Ordenar por fecha ascendente (más antigua primero)
-    LIMIT 1;
-    """
-    valor = consulta_db(query=query, obtener_datos='uno')
-    print('peso inicial', valor)
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso final total
+    query = query=crear_query('fecha', 'MAX')
+    valor = consulta_db(query, obtener_datos='uno')
+    valores['peso_final_total'] = valor[0]
+    fechas['peso_final_total'] = valor[1]
     
-    # 
-    if valor:
-        datos_peso['peso_inicial'] = valor[0]
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso perdido total
+    valores['peso_perdido_total'] = valores['peso_inicial_total'] - valores['peso_final_total']
+    # Obtener los dias que han pasado desde el peso inicial hasta el peso final
+    fecha_1 = datetime.strptime(str(fechas['peso_inicial_total']), "%Y-%m-%d")
+    fecha_2 = datetime.strptime(str(fechas['peso_final_total']), "%Y-%m-%d")
+    dias = (fecha_2 - fecha_1).days
+    fechas['peso_perdido_total'] = str(dias) + ' Dias'
     
-    # Obtener de la base de datos el peso actual
-    query="""
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso Maximo Total
+    query = crear_query('diurno', 'MAX')
+    valor = consulta_db(query, obtener_datos='uno')
+    valores['peso_mayor_total'] = valor[0]
+    fechas['peso_mayor_total'] = valor[1]
     
-    """
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso Menor Total
+    query = crear_query('diurno', 'MIN')
+    valor = consulta_db(query, obtener_datos='uno')
+    valores['peso_menor_total'] = valor[0]
+    fechas['peso_menor_total'] = valor[1]
     
-    return [dato_peso for dato_peso in datos_peso.values()]
+    
+    resultado = [
+        html.Div(children=[
+            html.P(str(valores[valor])+ ' KG', className='p_peso_valor'),
+            html.P(fechas[fecha], className='p_peso_fecha'),
+        ])
+        for valor, fecha in zip(valores, fechas)
+    ]
+    return resultado

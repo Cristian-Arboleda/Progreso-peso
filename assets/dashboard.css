@@ -11,18 +11,26 @@ main{
     flex-direction: row;
 }
 
-
-.div_contenedor_peso{
+.div_contenedor_pesos{
     display: flex;
     flex-direction: row;
     gap: 10px;
+    font-family: Verdana;
 }
 
-.divs_peso{
+.div_peso{
     background: rgb(251, 244, 244);
-    padding: 10px;
+    padding: 5px;
+    width: 200px;
+    text-align: center;
 }
 .p_peso_texto{
-    text-align: center;
-    font-size: 15px
+    font-size: 15px;
+}
+.p_peso_valor{
+    font-size: 25px;
+    font-weight: bold;
+}
+.p_peso_fecha{
+    font-size: 15px;
 }
