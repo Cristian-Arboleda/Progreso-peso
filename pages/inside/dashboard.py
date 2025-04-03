@@ -4,7 +4,7 @@ from datetime import datetime
 
 register_page(__name__, path='/dashboard')
 
-pesos_id = ['peso_inicial', 'peso_final', 'peso_perdido', 'peso_mayor', 'peso_menor', 'peso_perdido_prom']
+pesos_id = ['peso_inicial', 'peso_actual', 'peso_perdido', 'peso_mayor', 'peso_menor', 'peso_prom', 'peso_perd_prom']
 pesos_id_totales = [peso_id+'_total' for peso_id in pesos_id]
 pesos_id_relativos = [peso_id+'_relativo' for peso_id in pesos_id]
 
@@ -13,8 +13,8 @@ layout = html.Main(children=[
     html.Link(rel='stylesheet', href='assets/dashboard.css'),
     # -------------------------------------------------------------------------------------------------------------------------------
     html.Div(className= 'div_contenedor_opciones_principales', children=[
-        dcc.Dropdown( id = 'dropdown_years', clearable=False, searchable=False, multi=False, style={'width': '300px'},),
-        dcc.Dropdown( id = 'dropdown_months', clearable=False, searchable=False, multi=False, style={'width': '500px',},),
+        dcc.Dropdown( id = 'dropdown_years', clearable=False, searchable=False, multi=False, style={'width': '100px'},),
+        dcc.Dropdown( id = 'dropdown_months', clearable=False, searchable=False, multi=False, style={'width': '200px',},),
     ]),
     # Pesos totales
     html.Div(className='div_contenedor_pesos', children=[
@@ -135,20 +135,20 @@ def actualizas_pesos_totales(data):
     fechas['peso_inicial_total'] = valor[1]
     
     #-----------------------------------------------------------------------------------------------------------------
-    # Peso final total
+    # Peso actual total
     query = query=crear_query('fecha', 'MAX')
     valor = consulta_db(query, obtener_datos='uno')
-    valores['peso_final_total'] = valor[0]
-    fechas['peso_final_total'] = valor[1]
+    valores['peso_actual_total'] = valor[0]
+    fechas['peso_actual_total'] = valor[1]
     
     #-----------------------------------------------------------------------------------------------------------------
     # Peso perdido total
-    valores['peso_perdido_total'] = valores['peso_inicial_total'] - valores['peso_final_total']
-    # Obtener los dias que han pasado desde el peso inicial hasta el peso final
+    valores['peso_perdido_total'] = valores['peso_actual_total'] - valores['peso_inicial_total']
+    # Obtener los dias que han pasado desde el peso inicial hasta el peso actual
     fecha_1 = datetime.strptime(str(fechas['peso_inicial_total']), "%Y-%m-%d")
-    fecha_2 = datetime.strptime(str(fechas['peso_final_total']), "%Y-%m-%d")
-    dias = (fecha_2 - fecha_1).days
-    fechas['peso_perdido_total'] = str(dias) + ' Dias'
+    fecha_2 = datetime.strptime(str(fechas['peso_actual_total']), "%Y-%m-%d")
+    dias_peso_perdido = (fecha_2 - fecha_1).days
+    fechas['peso_perdido_total'] = str(dias_peso_perdido) + ' Días'
     
     #-----------------------------------------------------------------------------------------------------------------
     # Peso Maximo Total
@@ -164,12 +164,110 @@ def actualizas_pesos_totales(data):
     valores['peso_menor_total'] = valor[0]
     fechas['peso_menor_total'] = valor[1]
     
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso promedio Total
+    query = f'SELECT AVG(diurno) FROM progreso_peso_{usuario}'
+    valor = consulta_db(query, obtener_datos='uno')
+    valores['peso_prom_total'] = round(valor[0], 2)
+    fechas['peso_prom_total'] = ''
     
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso perdio en promedio total
+    valor = round(valores['peso_perdido_total'] / dias_peso_perdido, 3)
+    valores['peso_perd_prom_total'] = valor
+    fechas['peso_perd_prom_total'] = 'Por día'
+    
+    #-----------------------------------------------------------------------------------------------------------------
     resultado = [
         html.Div(children=[
             html.P(str(valores[valor])+ ' KG', className='p_peso_valor'),
             html.P(fechas[fecha], className='p_peso_fecha'),
         ])
         for valor, fecha in zip(valores, fechas)
+    ]
+    return resultado
+
+@callback(
+    [
+        Output(component_id=peso_id_relativo, component_property='children')
+        for peso_id_relativo in pesos_id_relativos
+    ],
+    Input(component_id='almacenamiento_datos', component_property='data'),
+    Input(component_id='dropdown_years', component_property='value'),
+    Input(component_id='dropdown_months', component_property='value'),
+)
+
+def actualizar_pesos_relativos(data, year_seleccionado, month_seleccionado):
+    usuario = data['sesion_iniciada_por']
+    tabla = f'progreso_peso_{usuario}'
+    
+    #
+    valores_peso = {peso_id_relativo: 'null' for peso_id_relativo in pesos_id_relativos}
+    fechas_peso = {peso_id_relativo: 'null' for peso_id_relativo in pesos_id_relativos}
+    def obtener_datos(columna_nombre, tipo):
+        query = f"""
+        SELECT diurno, fecha FROM {tabla}
+        WHERE EXTRACT(YEAR FROM fecha) = {year_seleccionado}
+        AND EXTRACT(MONTH FROM fecha) = {month_seleccionado}
+        ORDER BY {columna_nombre} {tipo}
+        LIMIT 1
+        """
+        resultado = consulta_db(query=query, obtener_datos='uno')
+        return resultado
+    #-----------------------------------------------------------------------------------------------------------------
+    # peso inicial relativo
+    valor = obtener_datos('fecha', 'ASC')
+    valores_peso['peso_inicial_relativo'] = valor[0]
+    fechas_peso['peso_inicial_relativo'] = valor[1]
+    #-----------------------------------------------------------------------------------------------------------------
+    # Peso actual relativo
+    valor = obtener_datos('diurno', 'ASC')
+    valores_peso['peso_actual_relativo'] = valor[0]
+    fechas_peso['peso_actual_relativo'] = valor[1]
+    
+    # Peso perdido relativo
+    valores_peso['peso_perdido_relativo'] = valores_peso['peso_actual_relativo'] - valores_peso['peso_inicial_relativo']
+    formato = '%Y-%m-%d'
+    fecha_1 = datetime.strptime(str(fechas_peso['peso_inicial_relativo']), formato)
+    fecha_2 = datetime.strptime(str(fechas_peso['peso_actual_relativo']), formato)
+    dias_peso_perdido = (fecha_2 - fecha_1).days
+    fechas_peso['peso_perdido_relativo'] = str(dias_peso_perdido) + ' Días'
+    
+    # Peso Mayor relativo 
+    valor = obtener_datos('diurno', 'DESC')
+    valores_peso['peso_mayor_relativo'] = valor[0]
+    fechas_peso['peso_mayor_relativo'] = valor[1]
+    
+    # Peso Menor relativo
+    valor = obtener_datos('diurno', 'ASC')
+    valores_peso['peso_menor_relativo'] = valor[0]
+    fechas_peso['peso_menor_relativo'] = valor[1]
+    
+    # Peso promedio relativo
+    query = f"""
+    SELECT AVG(diurno) FROM {tabla}
+    WHERE EXTRACT(YEAR FROM fecha) = {year_seleccionado}
+    AND EXTRACT(MONTH FROM fecha) = {month_seleccionado}
+    """
+    valor = round(consulta_db(query, 'uno')[0], 2)
+    valores_peso['peso_prom_relativo'] = valor
+    fechas_peso['peso_prom_relativo'] = ''
+    
+    # Peso promedio perdido relativo
+    # Evita divisiones por 0
+    if dias_peso_perdido == 0:
+        valores_peso['peso_perd_prom_relativo'] = 0
+    else:
+        valor = round(valores_peso['peso_perdido_relativo'] / dias_peso_perdido, 3)
+        valores_peso['peso_perd_prom_relativo'] = valor
+    fechas_peso['peso_perd_prom_relativo'] = 'Por día'
+    
+    #-----------------------------------------------------------------------------------------------------------------
+    resultado = [
+        html.Div(children=[
+            html.P(str(valores_peso[valor_peso]) + 'KG', className='p_peso_valor'),
+            html.P(fechas_peso[fecha_peso], className='p_peso_fecha'),
+        ])
+        for valor_peso, fecha_peso in zip(valores_peso, fechas_peso)
     ]
     return resultado
