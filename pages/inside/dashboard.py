@@ -1,6 +1,9 @@
 from dash import register_page, html, dcc, callback, Input, Output
 from conectar_db import *
 from datetime import datetime
+import pandas as pd
+import plotly.express as px
+
 
 register_page(__name__, path='/dashboard')
 
@@ -31,6 +34,11 @@ layout = html.Main(children=[
             html.Div(id=peso_relativo)
         ])
         for peso_relativo in pesos_id_relativos] 
+    ]),
+    # Graficos
+    html.Div(id='div_contenedor_graficos', children=[
+        html.Div(id='grafico_total'),
+        html.Div(id='graf_relativo'),
     ]),
 ])
 
@@ -172,8 +180,12 @@ def actualizas_pesos_totales(data):
     fechas['peso_prom_total'] = ''
     
     #-----------------------------------------------------------------------------------------------------------------
-    # Peso perdio en promedio total
-    valor = round(valores['peso_perdido_total'] / dias_peso_perdido, 3)
+    # Peso perdido en promedio total
+    if dias_peso_perdido == 0:
+        valor = '0'
+        pass
+    else:
+        valor = round(valores['peso_perdido_total'] / dias_peso_perdido, 3)
     valores['peso_perd_prom_total'] = valor
     fechas['peso_perd_prom_total'] = 'Por día'
     
@@ -196,7 +208,6 @@ def actualizas_pesos_totales(data):
     Input(component_id='dropdown_years', component_property='value'),
     Input(component_id='dropdown_months', component_property='value'),
 )
-
 def actualizar_pesos_relativos(data, year_seleccionado, month_seleccionado):
     usuario = data['sesion_iniciada_por']
     tabla = f'progreso_peso_{usuario}'
@@ -271,3 +282,40 @@ def actualizar_pesos_relativos(data, year_seleccionado, month_seleccionado):
         for valor_peso, fecha_peso in zip(valores_peso, fechas_peso)
     ]
     return resultado
+
+# Grafico
+
+@callback(
+    Output(component_id='grafico_total', component_property='children'),
+    Input(component_id='almacenamiento_datos', component_property='data'),
+)
+def actualizar_grafico_total(data):
+    usuario = data['sesion_iniciada_por']
+    
+    #crear conexion con la base de datos
+    conn = conectar_db()
+    
+    # crear consulta
+    query = f"SELECT diurno, fecha FROM progreso_peso_{usuario} ORDER BY fecha"
+    
+    # obtener datos de la base de datos
+    data_base = pd.read_sql(query, conn)
+    
+    data_base['fecha'] = pd.to_datetime(data_base['fecha'])
+    
+    # cerrar conexion
+    conn.close()
+    
+    # crear grafico
+    fig = px.line(
+        data_base,
+        x='fecha',
+        y='diurno',
+        title='Evolucion del peso Total'
+    )
+    
+    # Incluirlo en dcc.Graph
+    return dcc.Graph(
+        figure = fig
+    )
+

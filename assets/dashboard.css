@@ -34,3 +34,10 @@ main{
 .p_peso_fecha{
     font-size: 15px;
 }
+
+/* graficos */
+
+#div_contenedor_graficos{
+    display: flex;
+    flex-direction: column;
+}

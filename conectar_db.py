@@ -1,9 +1,9 @@
 import psycopg2
 
-host = 'dpg-cv3oekogph6c73esf4og-a.oregon-postgres.render.com'
-database = 'progreso_peso_bd'
-user = 'cristian'
-password = 'GtCaKjh9HeVkb9NhDTYj73mGGYR0ZwIw'
+host = 'ep-bold-fire-a56towq6-pooler.us-east-2.aws.neon.tech'
+database = 'progreso-peso-bd'
+user = 'neondb_owner'
+password = 'npg_XwISfjxY0rt5'
 port = '5432'
 
 def conectar_db():
@@ -13,6 +13,7 @@ def conectar_db():
         user = user,
         password = password,
         port = port,
+        sslmode="require",
     )
     return conn
 
@@ -26,5 +27,14 @@ def consulta_db(query, obtener_datos = None):
                 return cur.fetchone()
             conn.commit()
 
+
+'''
+CREATE TABLE progreso_peso_valentina(
+	id INTEGER,
+	fecha DATE,
+	diurno INTEGER,
+	nocturno INTEGER
+)
+'''
 if __name__ == '__main__':
-    pass
+    conn = conectar_db()
