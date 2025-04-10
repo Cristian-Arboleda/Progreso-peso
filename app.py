@@ -35,7 +35,6 @@ app.layout = html.Div([
 def lista_paginas(
     data, path, 
     ):
-    
     print(f'path actual: {path}')
     print(f'datos de sesion: {data}')
     

@@ -38,7 +38,7 @@ layout = html.Main(children=[
     # Graficos
     html.Div(id='div_contenedor_graficos', children=[
         html.Div(id='grafico_total'),
-        html.Div(id='graf_relativo'),
+        html.Div(id='grafico_relativo'),
     ]),
 ])
 
@@ -283,8 +283,7 @@ def actualizar_pesos_relativos(data, year_seleccionado, month_seleccionado):
     ]
     return resultado
 
-# Grafico
-
+# Graficos
 @callback(
     Output(component_id='grafico_total', component_property='children'),
     Input(component_id='almacenamiento_datos', component_property='data'),
@@ -311,11 +310,57 @@ def actualizar_grafico_total(data):
         data_base,
         x='fecha',
         y='diurno',
-        title='Evolucion del peso Total'
+        title='Evolucion del peso Total',
+        labels={"diurno": 'Peso (Kg)', 'fecha': 'Fecha'},
+        markers=True,
+        template='plotly_white',
+    )
+    fig.update_traces(line=dict(color='black'))
+    return dcc.Graph(figure = fig)
+
+@callback(
+    Output(component_id='grafico_relativo', component_property='children'),
+    Input(component_id='almacenamiento_datos', component_property='data'),
+    Input(component_id='dropdown_years', component_property='value'),
+)
+def actualizar_grafico_relativo(data, year_seleccionado):
+    usuario = data['sesion_iniciada_por']
+    tabla = f'progreso_peso_{usuario}'
+    
+    # crear consulta
+    query =f'''
+    SELECT diurno, fecha FROM {tabla}
+    WHERE EXTRACT(YEAR FROM fecha) = {year_seleccionado}
+    ORDER BY fecha
+    '''
+    
+    # conectar a base de datos
+    conn = conectar_db()
+    
+    # crear data frame
+    data_base = pd.read_sql(query, conn)
+    
+    # convertir a formato fecha
+    data_base['fecha'] = pd.to_datetime(data_base['fecha'])
+    
+    # crear nueva columna del mes
+    data_base['mes'] = data_base['fecha'].dt.month
+    data_base['dia'] = data_base['fecha'].dt.day
+    
+    print('database relativa\n', data_base)
+    fig = px.line(
+        data_base,
+        x='dia',
+        y='diurno',
+        color= 'mes',
+        template='plotly_dark',
+        markers=True,
+        title= 'Comparacion del peso diario entre meses',
+        labels={
+            'diurno': 'Peso (Kg)',
+            'dia': 'Día del mes',
+            'mes': 'Mes',
+        }
     )
     
-    # Incluirlo en dcc.Graph
-    return dcc.Graph(
-        figure = fig
-    )
-
+    return dcc.Graph(figure = fig,)

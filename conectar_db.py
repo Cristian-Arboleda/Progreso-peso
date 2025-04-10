@@ -32,8 +32,8 @@ def consulta_db(query, obtener_datos = None):
 CREATE TABLE progreso_peso_valentina(
 	id INTEGER,
 	fecha DATE,
-	diurno INTEGER,
-	nocturno INTEGER
+	diurno numeric(6,3),
+	nocturno numeric(6,3)
 )
 '''
 if __name__ == '__main__':

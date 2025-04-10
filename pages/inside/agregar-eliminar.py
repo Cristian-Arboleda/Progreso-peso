@@ -95,9 +95,7 @@ def actualizar_valores_inputs(almacenamiento_datos):
     
     return siguiente_id, fecha_actual
 
-
-
-# Enviar valores de los inputs a database.json al presionar el boton enviar
+# Enviar valores de los inputs a la base de datos al presionar el boton enviar
 @callback(
     Input(component_id='agregar_button', component_property='n_clicks'),
     State(component_id='id_input_agregar', component_property='value'),
