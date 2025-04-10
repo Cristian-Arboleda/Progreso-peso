@@ -3,7 +3,7 @@ from conectar_db import *
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
-
+import plotly.graph_objects as pgo
 
 register_page(__name__, path='/dashboard')
 
@@ -316,7 +316,41 @@ def actualizar_grafico_total(data):
         template='plotly_white',
     )
     fig.update_traces(line=dict(color='black'))
-    return dcc.Graph(figure = fig)
+    
+    peso_promedio = data_base['diurno'].mean()
+    fig.add_trace(
+        pgo.Scatter(
+            x=data_base['fecha'],
+            y = [peso_promedio] * len(data_base),
+            mode='lines',
+            line={'color': 'gray', 'dash': 'dash'},
+            name='Promedio',
+        )
+    )
+    
+    fig.update_layout(
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.0,
+            xanchor='center',
+            x=0.5,
+        ),
+        title=dict(x=0.5,)
+    )
+    
+    return dcc.Graph(
+        figure = fig,
+        config={
+            'scrollZoom': False,
+            'displaylogo': False,
+            'modeBarButtonsToRemove': [
+                'select2d',     # desactiva selección rectangular
+                'lasso2d',      # desactiva selección lazo
+                'autoScale2d',  # desactiva "auto escala"
+            ],
+        }
+    )
 
 @callback(
     Output(component_id='grafico_relativo', component_property='children'),
@@ -347,20 +381,36 @@ def actualizar_grafico_relativo(data, year_seleccionado):
     data_base['mes'] = data_base['fecha'].dt.month
     data_base['dia'] = data_base['fecha'].dt.day
     
-    print('database relativa\n', data_base)
     fig = px.line(
         data_base,
         x='dia',
         y='diurno',
         color= 'mes',
-        template='plotly_dark',
+        template='plotly_white',
         markers=True,
         title= 'Comparacion del peso diario entre meses',
         labels={
             'diurno': 'Peso (Kg)',
             'dia': 'Día del mes',
             'mes': 'Mes',
-        }
+        },
+        color_discrete_sequence=px.colors.qualitative.Pastel
     )
     
-    return dcc.Graph(figure = fig,)
+    # Calcular el promedio del peso diurno
+    promedio_peso = data_base['diurno'].mean()
+    
+    fig.add_trace(
+        pgo.Scatter(
+            x=data_base['dia'],
+            y=[promedio_peso] * len(data_base),
+            mode='lines',
+            line=dict(color='gray', dash='dash'),
+            name='Promedio'
+        )
+    )
+    fig.update_layout(title={'x': 0.5})
+    return dcc.Graph(
+        figure = fig,
+        config={'displaylogo': False,}
+    )

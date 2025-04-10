@@ -2,8 +2,11 @@ main{
     background: #e7e7f9;
     display: flex;
     flex-direction: column;
-    margin: 0px 10px;
+    margin: 0px 10px auto;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
+    width: 1500px;
 }
 
 .div_contenedor_opciones_principales{
@@ -18,6 +21,8 @@ main{
     justify-content: center;
     font-family: Verdana;
 }
+
+
 
 .div_peso{
     background: rgb(251, 244, 244);

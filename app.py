@@ -11,10 +11,7 @@ app = Dash(
 server = app.server
 
 app.layout = html.Div([
-    html.Link(
-        rel='stylesheet',
-        href='assets/menu_de_paginas.css'
-    ),
+    html.Link(rel='stylesheet', href='assets/menu_de_paginas.css',),
     dcc.Store('almacenamiento_datos', storage_type='session'), # almacena y obtiene los datos de sesion
     dcc.Location(id='path', refresh=True), # Obtiene la path de la pagina actual
     #---------------------------------------------------------------------------------------------------------
