@@ -349,7 +349,8 @@ def actualizar_grafico_total(data):
                 'lasso2d',      # desactiva selección lazo
                 'autoScale2d',  # desactiva "auto escala"
             ],
-        }
+        },
+        className='grafico',
     )
 
 @callback(
@@ -412,5 +413,6 @@ def actualizar_grafico_relativo(data, year_seleccionado):
     fig.update_layout(title={'x': 0.5})
     return dcc.Graph(
         figure = fig,
-        config={'displaylogo': False,}
+        config={'displaylogo': False,},
+        className='grafico'
     )
