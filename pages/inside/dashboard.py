@@ -192,7 +192,7 @@ def actualizas_pesos_totales(data):
     #-----------------------------------------------------------------------------------------------------------------
     resultado = [
         html.Div(children=[
-            html.P(str(valores[valor])+ ' KG', className='p_peso_valor'),
+            html.P(str(valores[valor])+ ' Kg', className='p_peso_valor'),
             html.P(fechas[fecha], className='p_peso_fecha'),
         ])
         for valor, fecha in zip(valores, fechas)
@@ -276,7 +276,7 @@ def actualizar_pesos_relativos(data, year_seleccionado, month_seleccionado):
     #-----------------------------------------------------------------------------------------------------------------
     resultado = [
         html.Div(children=[
-            html.P(str(valores_peso[valor_peso]) + 'KG', className='p_peso_valor'),
+            html.P(str(valores_peso[valor_peso]) + ' Kg', className='p_peso_valor'),
             html.P(fechas_peso[fecha_peso], className='p_peso_fecha'),
         ])
         for valor_peso, fecha_peso in zip(valores_peso, fechas_peso)
