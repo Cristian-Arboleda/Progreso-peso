@@ -45,8 +45,8 @@ main{
     display: flex;
     flex-direction: row;
     gap: 10px;
-    align-items: center;
     justify-content: center;
+    margin: 0px auto
 }
 
 .grafico{
@@ -57,12 +57,13 @@ main{
     .div_contenedor_pesos{
         display: flex;
         flex-direction: column;
+        justify-content: center;
     }
     #div_contenedor_graficos{
         display: flex;
         flex-direction: column;
     }
     .grafico{
-        width:500px
+        width:300px
     }
 }
