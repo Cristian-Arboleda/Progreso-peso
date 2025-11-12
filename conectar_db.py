@@ -5,16 +5,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def conectar_db():
-    HOST = os.getenv('HOST')
-    DATABASE = os.getenv('DATABASE')
-    USER = os.getenv('USER')
-    PASSWORD = os.getenv('PASSWORD')
+    PGHOST = os.getenv('HOST')
+    PGDATABASE = os.getenv('DATABASE')
+    PGUSER = os.getenv('USER')
+    PGPASSWORD = os.getenv('PASSWORD')
     
     conn = psycopg2.connect(
-        host = HOST,
-        database = DATABASE,
-        user = USER,
-        password = PASSWORD,
+        host = PGHOST,
+        database = PGDATABASE,
+        user = PGUSER,
+        password = PGPASSWORD,
         sslmode="require",
     )
     return conn
