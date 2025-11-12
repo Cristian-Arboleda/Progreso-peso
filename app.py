@@ -21,6 +21,7 @@ app.layout = html.Div([
 ])
 
 
+
 # mostrar encabezado de las paginas despues de iniciar sesion
 @callback(
     Output(component_id='menu_de_paginas_contenedor', component_property='children'),
@@ -56,4 +57,4 @@ def lista_paginas(
 
 
 if __name__ == "__main__":
-    app.run(port=8056, debug=True)
+    app.run(host="127.0.0.1", port=8056, debug=True)
